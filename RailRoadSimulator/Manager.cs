@@ -25,7 +25,7 @@ namespace RailRoadSimulator
 			this.main = main;
 			this.coordinates = coordinates;
 
-			CreateGraph(coordinates);
+			//CreateGraph(coordinates);
 
 			RailroadEventManager.Register(this);
 			//To speed up for testing
@@ -57,11 +57,34 @@ namespace RailRoadSimulator
 			//Make if else statements based on every fired event
 			if (evt.EventType == RailroadEventType.SPAWN_TRAIN)
 			{
+				TempIdentity temp = new TempIdentity();
+
+				foreach (var item in coordinates) {
+					if (item != null) {
+						if (item.areaType == "Station" && item.whatIsIt == Char.Parse(itemValue)) {
+							temp.X = item.X;
+							temp.Y = item.Y;
+							break;
+						}
+					}
+				}
 				//Spawn a train
-				Train train = new Train();
+				Train train = new Train(temp);
+				int number = 0;
+				string extract = "";
 				//this is a string now, maybe convert the string to int
 				//then we have to search for the number in the string
-				train.amountOfWagons = itemKey;
+				for (int i = 0; i < itemKey.Length; i++)
+				{
+					if (Char.IsDigit(itemKey[i]))
+						extract += itemKey[i];
+				}
+
+				if (extract.Length > 0)
+				{
+					number = int.Parse(extract);
+				}
+				train.amountOfWagons = number;
 				train.startLocation = itemValue;
 				//Key is amount of wagons
 				//Value is startlocation of train
@@ -74,7 +97,7 @@ namespace RailRoadSimulator
 			else if (evt.EventType == RailroadEventType.SPAWN_PASSENGER)
 			{
 				//create new person/passanger
-				TempPerson tempPerson = new TempPerson();
+				TempIdentity tempPerson = new TempIdentity();
 				tempPerson.startStation = itemKey;
 				tempPerson.endStation = itemValue;
 
@@ -141,64 +164,64 @@ namespace RailRoadSimulator
 		/// and store them
 		/// </summary>
 		/// <param name="coordinates">All the room coordinates.</param>
-		public void CreateGraph(ILayout[,] coordinates)
-		{
-			this.coordinates = coordinates;
+		//public void CreateGraph(ILayout[,] coordinates)
+		//{
+		//	this.coordinates = coordinates;
 
-			//This only gives neighbours on left and right, still have to make function for top and bottom
-			foreach (ILayout lay in coordinates)
-			{
+		//	//This only gives neighbours on left and right, still have to make function for top and bottom
+		//	foreach (ILayout lay in coordinates)
+		//	{
 
-				if (lay != null)
-				{
-					lay.neighbours.Clear();
-					int left = lay.position.X - 1;
-					int right = lay.position.X + 1;
-					int top = lay.position.Y + 1;
-					int bottom = lay.position.Y - 1;
-					while (left >= 0 && coordinates[left, lay.position.Y] == null)
-					{
-						left--;
-					}
-					while (right < coordinates.GetLength(0) && coordinates[right, lay.position.Y] == null)
-					{
-						right++;
-					}
-					while (top < coordinates.GetLength(1) && coordinates[lay.position.X, top] == null)
-					{
-						top++;
-					}
-					while (bottom >= 0 && coordinates[lay.position.X, bottom] == null)
-					{
-						bottom++;
-					}
-					//if (top < coordinates.GetLength(1) && coordinates[lay.position.X, top] != null)
-					//{
-					//	ILayout Top = coordinates[lay.position.X, top];
-					//	lay.neighbours.Add(Top, 1);
-					//}
-					//if (bottom >= 0 && coordinates[lay.position.X, bottom] != null)
-					//{
-					//	ILayout Bottom = coordinates[lay.position.X, bottom];
-					//	lay.neighbours.Add(Bottom, 1);
-					//}
-					if (left >= 0 && coordinates[left, lay.position.Y] != null)
-					{
-						ILayout Left = coordinates[left, lay.position.Y];
-						lay.neighbours.Add(Left, 1);
-					}
-					if (right < coordinates.GetLength(0) && coordinates[right, lay.position.Y] != null)
-					{
-						ILayout Right = coordinates[right, lay.position.Y];
-						lay.neighbours.Add(Right, 1);
-					}
-					foreach (var a in lay.neighbours)
-					{
-						Console.WriteLine("LayoutItem: " + lay.id + " Has neighbours: " + a.Key.id + " amount of neighbours= " + lay.neighbours.Count);
-					}
-				}
-			}
+		//		if (lay != null)
+		//		{
+		//			lay.neighbours.Clear();
+		//			int left = lay.position.X - 1;
+		//			int right = lay.position.X + 1;
+		//			int top = lay.position.Y + 1;
+		//			int bottom = lay.position.Y - 1;
+		//			while (left >= 0 && coordinates[left, lay.position.Y] == null)
+		//			{
+		//				left--;
+		//			}
+		//			while (right < coordinates.GetLength(0) && coordinates[right, lay.position.Y] == null)
+		//			{
+		//				right++;
+		//			}
+		//			while (top < coordinates.GetLength(1) && coordinates[lay.position.X, top] == null)
+		//			{
+		//				top++;
+		//			}
+		//			while (bottom >= 0 && coordinates[lay.position.X, bottom] == null)
+		//			{
+		//				bottom++;
+		//			}
+		//			//if (top < coordinates.GetLength(1) && coordinates[lay.position.X, top] != null)
+		//			//{
+		//			//	ILayout Top = coordinates[lay.position.X, top];
+		//			//	lay.neighbours.Add(Top, 1);
+		//			//}
+		//			//if (bottom >= 0 && coordinates[lay.position.X, bottom] != null)
+		//			//{
+		//			//	ILayout Bottom = coordinates[lay.position.X, bottom];
+		//			//	lay.neighbours.Add(Bottom, 1);
+		//			//}
+		//			if (left >= 0 && coordinates[left, lay.position.Y] != null)
+		//			{
+		//				ILayout Left = coordinates[left, lay.position.Y];
+		//				lay.neighbours.Add(Left, 1);
+		//			}
+		//			if (right < coordinates.GetLength(0) && coordinates[right, lay.position.Y] != null)
+		//			{
+		//				ILayout Right = coordinates[right, lay.position.Y];
+		//				lay.neighbours.Add(Right, 1);
+		//			}
+		//			foreach (var a in lay.neighbours)
+		//			{
+		//				Console.WriteLine("LayoutItem: " + lay.id + " Has neighbours: " + a.Key.id + " amount of neighbours= " + lay.neighbours.Count);
+		//			}
+		//		}
+		//	}
 
-		}
+		//}
 	}
 }

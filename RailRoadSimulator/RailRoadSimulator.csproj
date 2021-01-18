@@ -57,7 +57,7 @@
     <Compile Include="Factories\AbstractFactory.cs" />
     <Compile Include="Factories\EntityFactory\IEntity.cs" />
     <Compile Include="Factories\EntityFactory\EntityFactory.cs" />
-    <Compile Include="Factories\EntityFactory\TempPerson.cs" />
+    <Compile Include="Factories\EntityFactory\TempIdentity.cs" />
     <Compile Include="Factories\EntityFactory\Train.cs" />
     <Compile Include="Factories\LayoutFactory\ILayout.cs" />
     <Compile Include="Factories\LayoutFactory\LayoutFactory.cs" />
@@ -71,7 +71,6 @@
     <Compile Include="Factories\Railway\IRailway.cs" />
     <Compile Include="Factories\Railway\RailwayFactory.cs" />
     <Compile Include="Factories\Railway\Station.cs" />
-    <Compile Include="Factories\Railway\VerticalRailway.cs" />
     <Compile Include="Form1.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -81,7 +80,7 @@
     <Compile Include="Manager.cs" />
     <Compile Include="Pathfinding\AStarAlgorithm.cs" />
     <Compile Include="Pathfinding\Node.cs" />
-    <Compile Include="Pathfinding\Tile.cs" />
+    <Compile Include="Factories\LayoutFactory\Tile.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <EmbeddedResource Include="Form1.resx">
@@ -116,10 +115,8 @@
   </ItemGroup>
   <ItemGroup />
   <ItemGroup>
-    <Content Include="Assets\Lobby.png" />
     <Content Include="Assets\location.png" />
     <Content Include="Assets\railway-station.png" />
-    <Content Include="Assets\room.png" />
     <Content Include="Assets\station.png" />
     <Content Include="Assets\track.png" />
     <Content Include="Assets\tracks - kopie.png" />

@@ -9,7 +9,8 @@ namespace RailRoadSimulator.Factories.EntityFactory
 {
 	public abstract class IEntity
 	{
-
+		public int X { get; set; }
+		public int Y { get; set; }
 		public Image model { get; set; }
 
 		public IEntity()

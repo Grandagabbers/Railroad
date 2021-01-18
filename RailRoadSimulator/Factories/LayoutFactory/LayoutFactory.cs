@@ -25,50 +25,66 @@ namespace RailRoadSimulator.Factories.LayoutFactory
 		{
 			DeserializeLayout();
 
-			//foreach temproom create a definite room
-			//add definite room to the room list
-			foreach (TempLayout temp in tempRooms)
-			{
+            //add to layout every tile
+            foreach (Tile tile in allTiles) {
+                layout.Add(GenerateRoom<ILayout>(tile.areaType, tile));
+            }
 
-				if (temp.areaType != null)
-				{
-					layout.Add(GenerateRoom<ILayout>(temp.areaType, temp));
-				}
-			}
-
-            CreateOverview();
+           CreateOverview();
         }
 
-		/// <summary>
-		/// read out the json layout file and save it in a temporary list with temporary rooms
-		/// </summary>
-		private void DeserializeLayout()
-		{
+        /// <summary>
+        /// read out the json layout file and save it in a temporary list with temporary rooms
+        /// </summary>
+        private void DeserializeLayout()
+        {
             //var json = File.ReadAllLines(@"..\..\final-assignment.trc");
             finalLay = File.ReadAllLines(@"..\..\simple-8.trc").ToList();
-            foreach (var singleLine in finalLay) {
-                foreach (var singleChar in singleLine) {
+
+            int y = 0;
+            foreach (var singleLine in finalLay)
+            {
+                int x = 0;
+                foreach (var singleChar in singleLine)
+                {
                     Tile tile = new Tile();
-                    var test = Char.IsLetter(singleChar);
-                    switch (test)
+                    switch (singleChar)
                     {
                         //this checks if it is a letter from the alphabet, if so make station
-                        case true:
-                            tile.areaType = "";
+                        case 'A':
+                        case 'B':
+                        case 'C':
+                        case 'D':
+                            tile.areaType = "Station";
+                            tile.whatIsIt = singleChar;
+                            tile.X = x;
+                            tile.Y = y;
                             allTiles.Add(tile);
                             break;
-                    }
-                    switch (singleChar) {
-                        case ' ':
-                            tile.areaType = "";
-                            allTiles.Add(tile);
-                            break;
-                    }
 
+                        //use default because we want to check every item in the list
+                        default:
+                            //if singlechar is not a space then its a track so make that class
+                            if (singleChar != ' ')
+                            {
+                                tile.whatIsIt = singleChar;
+                                tile.areaType = "Track";
+                                if (tile.rideableTracks.Contains(singleChar))
+                                {
+                                    tile.isDubbelTrack = true;
+                                }
+                                tile.X = x;
+                                tile.Y = y;
+                                allTiles.Add(tile);
+                                break;
+                            }
+                            break;
+                    }
+                    x++;
                 }
+                y++;
             }
-            
-
+            Console.WriteLine("done");
 			//convert json to templayout
 			//tempRooms = JsonConvert.DeserializeObject<List<TempLayout>>(json);
 		}
@@ -80,7 +96,7 @@ namespace RailRoadSimulator.Factories.LayoutFactory
         /// <param name="lay">areaType of the item</param>
         /// <param name="temp">temperary room for constructor</param>
         /// <returns>instance of the given type room</returns>
-        public ILayout GenerateRoom<T>(string lay, TempLayout temp) where T : ILayout
+        public ILayout GenerateRoom<T>(string lay, Tile temp) where T : ILayout
         {
             //get the type of the room
             Type type = Type.GetType(lay);
@@ -138,23 +154,24 @@ namespace RailRoadSimulator.Factories.LayoutFactory
             //set the dimensions of the 2dArray
             foreach (ILayout lay in layout)
             {
-                if (lay.position.X > maxArray.X)
+                if (lay.X > maxArray.X)
                 {
-                    maxArray.X = lay.position.X;
+                    maxArray.X = lay.X;
                 }
-                if (lay.position.Y > maxArray.Y)
+                if (lay.Y > maxArray.Y)
                 {
-                    maxArray.Y = lay.position.Y;
+                    maxArray.Y = lay.Y;
                 }
             }
 
             //create 2dArray
-            coordinates = new ILayout[maxArray.X + 1, maxArray.Y + 1];
+            coordinates = new ILayout[maxArray.X + 2, maxArray.Y + 1];
 
             //add the items  to the array
             foreach (ILayout lay in layout)
             {
-                coordinates[lay.position.X, lay.position.Y] = lay;
+                coordinates[lay.X, lay.Y] = lay;         
+                
             }
             return coordinates;
         }

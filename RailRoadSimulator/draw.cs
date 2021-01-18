@@ -10,7 +10,7 @@ namespace RailRoadSimulator
 {
 	public class Draw
 	{
-        public int drawSizeItem { get; } = 100;
+        public int drawSizeItem { get; } = 50;
 		public Draw()
 		{
 
@@ -39,7 +39,7 @@ namespace RailRoadSimulator
             }
 
             //flip the bitmap so the background is displayed correctly
-            layout.RotateFlip(RotateFlipType.Rotate180FlipX);
+           layout.RotateFlip(RotateFlipType.Rotate180FlipX);
 
             return layout;
         }

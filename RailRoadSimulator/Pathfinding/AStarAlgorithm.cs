@@ -19,7 +19,7 @@ namespace RailRoadSimulator.Pathfinding
 		/// <param name="map">the layout of the map</param>
 		/// <param name="startLoc">startlocation</param>
 		/// <param name="endLoc">endlocation</param>
-		public void findTiles(List<string> map, char startLoc, char endLoc)
+		public List<Tile> findTiles(List<string> map, char startLoc, char endLoc)
 		{
 			//This gets the start coordinates of the train
 			var start = new Tile();
@@ -66,7 +66,7 @@ namespace RailRoadSimulator.Pathfinding
 							Console.WriteLine("Map looks like :");
 							map.ForEach(x => Console.WriteLine(x));
 							Console.WriteLine("Done!");
-							return;
+							return finalList;
 						}
 					}
 				}
@@ -99,9 +99,8 @@ namespace RailRoadSimulator.Pathfinding
 					}
 				}
 			}
-
 			Console.WriteLine("No Path Found!");
-
+			return null;
 
 		}
 		/// <summary>

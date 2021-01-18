@@ -10,14 +10,14 @@ namespace RailRoadSimulator.Factories.LayoutFactory
 	public class Station : ILayout
 	{
 		public string classification { get; set; } //amount of stars a room has
-		public Station(TempLayout temp)
+		public Station(Tile temp)
 		{
 			areaType = temp.areaType;
-			position = temp.position;
-			classification = temp.classification;
+			X = temp.X;
+			Y = temp.Y;
 			model = Image.FromFile(@"..\..\Assets\station.png");
+			whatIsIt = temp.whatIsIt;
 			model.RotateFlip(RotateFlipType.Rotate180FlipX);//rotate image so its correctly displayed
-			id = temp.id;
 		}
 	}
 }

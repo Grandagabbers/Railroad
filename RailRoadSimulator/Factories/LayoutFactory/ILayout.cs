@@ -10,20 +10,19 @@ namespace RailRoadSimulator.Factories.LayoutFactory
 	public abstract class ILayout
 	{
 		public string areaType { get; set; }
-		public Point position { get; set; }
-		public int id { get; set; }
+		public int X { get; set; }
+		public int Y { get; set; }
+
 		public Image model { get; set; }
 		//distance from an other room, its used for A* and pathfinding
-		public int distance { get; set; } 
-		public Dictionary<ILayout, int> neighbours { get; set; }
-		//used for pathfinding
-		public ILayout prev { get; set; }  
-
+		public Tile Parent { get; set; }
+		public int Cost { get; set; }
+		public int Distance { get; set; }
+		public int CostDistance => Cost + Distance;
+		public char whatIsIt { get; set; }
 		public ILayout()
 		{
-			distance = Int32.MaxValue / 2;
-			prev = null;
-			neighbours = new Dictionary<ILayout, int>();
+
 		}
 
 		/// <summary>
@@ -37,7 +36,7 @@ namespace RailRoadSimulator.Factories.LayoutFactory
 			using (Graphics g = Graphics.FromImage(layout))
 			{
 
-				g.DrawImage(model, position.X * size, position.Y * size);
+				g.DrawImage(model, X * size, Y * size);
 			}
 			return layout;
 		}
