@@ -1,0 +1,14 @@
+C:\Users\grand\source\repos\RailRoadSimulator\RailRoadSimulator\obj\Debug\RailRoadSimulator.csprojAssemblyReference.cache
+C:\Users\grand\source\repos\RailRoadSimulator\RailRoadSimulator\obj\Debug\RailRoadSimulator.Properties.Resources.resources
+C:\Users\grand\source\repos\RailRoadSimulator\RailRoadSimulator\obj\Debug\RailRoadSimulator.csproj.GenerateResource.cache
+C:\Users\grand\source\repos\RailRoadSimulator\RailRoadSimulator\obj\Debug\RailRoadSimulator.csproj.CoreCompileInputs.cache
+C:\Users\grand\source\repos\RailRoadSimulator\RailRoadSimulator\bin\Debug\RailRoadSimulator.exe.config
+C:\Users\grand\source\repos\RailRoadSimulator\RailRoadSimulator\bin\Debug\RailRoadSimulator.exe
+C:\Users\grand\source\repos\RailRoadSimulator\RailRoadSimulator\bin\Debug\RailRoadSimulator.pdb
+C:\Users\grand\source\repos\RailRoadSimulator\RailRoadSimulator\bin\Debug\Newtonsoft.Json.dll
+C:\Users\grand\source\repos\RailRoadSimulator\RailRoadSimulator\bin\Debug\RailroadEvents.dll
+C:\Users\grand\source\repos\RailRoadSimulator\RailRoadSimulator\bin\Debug\Newtonsoft.Json.xml
+C:\Users\grand\source\repos\RailRoadSimulator\RailRoadSimulator\obj\Debug\RailRoadSimulator.csproj.CopyComplete
+C:\Users\grand\source\repos\RailRoadSimulator\RailRoadSimulator\obj\Debug\RailRoadSimulator.exe
+C:\Users\grand\source\repos\RailRoadSimulator\RailRoadSimulator\obj\Debug\RailRoadSimulator.pdb
+C:\Users\grand\source\repos\RailRoadSimulator\RailRoadSimulator\obj\Debug\RailRoadSimulator.MainForm.resources
