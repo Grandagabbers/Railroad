@@ -97,9 +97,30 @@ namespace RailRoadSimulator
 			else if (evt.EventType == RailroadEventType.SPAWN_PASSENGER)
 			{
 				//create new person/passanger
-				TempIdentity tempPerson = new TempIdentity();
-				tempPerson.startStation = itemKey;
-				tempPerson.endStation = itemValue;
+				TempIdentity temp = new TempIdentity();
+
+				foreach (var item in coordinates)
+				{
+					if (item != null)
+					{
+						if (item.areaType == "Station" && item.whatIsIt == itemKey.Last())
+						{
+							temp.X = item.X;
+							temp.Y = item.Y;
+							break;
+						}
+						if (item.areaType == "Station" && item.whatIsIt == itemValue.Last())
+						{
+							temp.endX = item.X;
+							temp.endY = item.Y;
+							break;
+						}
+					}
+				}
+				Person person = new Person(temp);
+				//debug purposes
+				person.startLoc = itemKey;
+				person.endLoc = itemValue;
 
 				//set startcoordinates
 				//check if train is at station, if so then step in train
@@ -135,12 +156,12 @@ namespace RailRoadSimulator
 				//Value is how many seconds and then normal again
 				Console.WriteLine("Leaves on track Key is: " + itemKey);
 				Console.WriteLine("Leaves on track Value is: " + itemValue);
+				while (watch.ElapsedMilliseconds != 10000) {
 
-				if (watch.ElapsedMilliseconds == 10) {
-					Console.WriteLine("10 Seconds have passed, speed up again");
-					RailroadEventManager.RRTE_Factor = RailroadEventManager.RRTE_Factor * 2f;
-					watch.Stop();
 				}
+				Console.WriteLine("10 Seconds have passed, speed up again");
+				RailroadEventManager.RRTE_Factor = RailroadEventManager.RRTE_Factor * 2f;
+				watch.Stop();
 
 			}
 			else if (evt.EventType == RailroadEventType.RETIRE_TRAIN)

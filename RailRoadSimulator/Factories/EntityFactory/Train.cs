@@ -9,7 +9,7 @@ namespace RailRoadSimulator.Factories.EntityFactory
 {
 	public class Train : IEntity
 	{
-		public int amountOfWagons { get; set; }
+		public int amountOfWagons { get; set; } = 0;
 		public string destination { get; set; }
 		public string startLocation { get; set; }
 		public Image wagonModel { get; set; }
@@ -20,15 +20,15 @@ namespace RailRoadSimulator.Factories.EntityFactory
 			Y = temp.Y;
 			model = Image.FromFile(@"..\..\Assets\train.png");
 			model.RotateFlip(RotateFlipType.Rotate180FlipX);//rotate image so its correctly displayed
-			//if (amountOfWagons > 0) {
-			//	for (int i = 0; i != amountOfWagons; i++)
-			//	{
-			//		wagonModel = Image.FromFile(@"..\..\Assets\train.png");
-			//		model.RotateFlip(RotateFlipType.Rotate180FlipX);//rotate image so its correctly displayed
+			if (amountOfWagons > 0)
+			{
+				for (int i = 0; i != amountOfWagons; i++)
+				{
+					wagonModel = Image.FromFile(@"..\..\Assets\train.png");
+					model.RotateFlip(RotateFlipType.Rotate180FlipX);//rotate image so its correctly displayed
+				}
 
-			//	}
-				
-			//}
+			}
 		}
 	}
 }

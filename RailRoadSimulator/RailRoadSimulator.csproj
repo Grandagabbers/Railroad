@@ -57,6 +57,7 @@
     <Compile Include="Factories\AbstractFactory.cs" />
     <Compile Include="Factories\EntityFactory\IEntity.cs" />
     <Compile Include="Factories\EntityFactory\EntityFactory.cs" />
+    <Compile Include="Factories\EntityFactory\Person.cs" />
     <Compile Include="Factories\EntityFactory\TempIdentity.cs" />
     <Compile Include="Factories\EntityFactory\Train.cs" />
     <Compile Include="Factories\LayoutFactory\ILayout.cs" />

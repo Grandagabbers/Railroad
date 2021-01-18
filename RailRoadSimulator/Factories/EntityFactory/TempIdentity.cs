@@ -9,8 +9,8 @@ namespace RailRoadSimulator.Factories.EntityFactory
 {
 	public class TempIdentity : IEntity
 	{
-		public string startStation { get; set; }
-		public string endStation { get; set; }
+		public int endX { get; set; }
+		public int endY { get; set; }
 
 		public TempIdentity()
 		{
