@@ -5,7 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace RailRoadSimulator.Factories.EntityFactory
+namespace RailRoadSimulator
 {
 	public class Person : IEntity
 	{
@@ -13,6 +13,7 @@ namespace RailRoadSimulator.Factories.EntityFactory
 		public string endLoc { get; set; }
 		public Person(TempIdentity temp)
 		{
+			areaType = temp.areaType;
 			X = temp.X;
 			Y = temp.Y;
 			model = Image.FromFile(@"..\..\Assets\train.png");

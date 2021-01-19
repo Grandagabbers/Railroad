@@ -1,5 +1,4 @@
-﻿using RailRoadSimulator.Factories.LayoutFactory;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
@@ -42,6 +41,27 @@ namespace RailRoadSimulator
            layout.RotateFlip(RotateFlipType.Rotate180FlipX);
 
             return layout;
+        }
+
+        /// <summary>
+        /// Draw the personLayout 
+        /// </summary>
+        /// <param name="personLayout">bitmap to draw on</param>
+        /// <param name="people">persons to draw</param>
+        /// <returns>personLaoyout with the drawn persons</returns>
+        public Bitmap DrawPersonLayout(Bitmap personLayout, Dictionary<IEntity, Tile> people)
+        {
+            //Foreach person in people
+            //Draw it on the bitmap
+            foreach (IEntity everyPerson in people.Keys)
+            {
+                personLayout = everyPerson.DrawPerson((Bitmap)personLayout, drawSizeItem);
+            }
+
+            //flip bitmap so it displays correctly
+            personLayout.RotateFlip(RotateFlipType.Rotate180FlipX);
+
+            return (Bitmap)personLayout;
         }
     }
 }

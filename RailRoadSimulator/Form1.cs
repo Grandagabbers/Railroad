@@ -1,5 +1,4 @@
 ﻿using RailroadEvents;
-using RailRoadSimulator.Factories.LayoutFactory;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -14,7 +13,7 @@ namespace RailRoadSimulator
 {
 	public partial class MainForm : Form
 	{
-		private Timer timer { get; } = new Timer();
+		public Timer timer { get; } = new Timer();
 
 		private int timerTickCount { get; set; }
 
@@ -27,11 +26,12 @@ namespace RailRoadSimulator
         private Draw draw = new Draw();
         private LayoutFactory fac = new LayoutFactory();
 
-		//private Factory
+        public Dictionary<IEntity, Tile> peopleToDraw = new Dictionary<IEntity, Tile>();
+        //private Factory
 
 
-		//Form atributes
-		private int buttonCounter { get; set; }
+        //Form atributes
+        private int buttonCounter { get; set; }
 		public Button pauseButton = new Button();
 		public Button speedButton = new Button();
 		public Button stopButton = new Button();
@@ -43,8 +43,9 @@ namespace RailRoadSimulator
             fac.GenerateEntity();
             manager = new Manager(fac.coordinates, this);
             background = draw.DrawLayout(fac.coordinates);
-			InitializeComponent();
+            trainLayout = new Bitmap(background.Width, background.Height);
 
+			InitializeComponent();
             railRoadMap.BackgroundImage = background;
 
             //Setup buttons
@@ -69,9 +70,66 @@ namespace RailRoadSimulator
             //Start the hotel events 
             RailroadEventManager.Start();
 			timer.Start();
-		}
+
+            //call the update function after each timer tick.
+            timer.Tick += new EventHandler(UpdateImage);
+        }
+
+        /// <summary>
+        /// update the displayed image in the picturebox of the form so there can be animations displayed.
+        /// </summary>
+        /// <param name="sender">interval</param>
+        /// <param name="e"></param>
+        private void UpdateImage(object sender, EventArgs e)
+        {
+            trainLayout.Dispose();//empty the Bitmap
+            trainLayout = new Bitmap(background.Width, background.Height); //create new one
+
+            //if there are changes in the simulation
+            //update personlayout 
+            if (peopleToDraw != manager.people)
+            {
+                peopleToDraw.Clear();//empty the list 
+
+                //foreach person in manager.people add it to peopleToDraw
+                foreach (KeyValuePair<IEntity, Tile> person in manager.people)
+                {
+                    IEntity last = manager.people.Keys.Last();
+                    peopleToDraw.Add(person.Key, person.Value);
+
+                    //if person has a path to walk. go walk
+                    if (person.Key.route != null && person.Key.route.Count > 0)
+                    {
+                        bool wait = false;
+
+                        if (wait == false)//if wait is false. The person is not in a elevator so it can continue moving. 
+                        {
+                            person.Key.WalkTo();
+                            ILayout check = fac.coordinates[person.Key.X, person.Key.Y];
+                            if (check != null && fac.coordinates[check.X, check.Y] == check)
+                            {
+                                person.Key.currentRoom = check;
+                            }
+
+                        }
+                        wait = false;
+                    }
+
+                }
+
+            }
+            //draw the new personLayout and background
+            background.Dispose();
+            background = draw.DrawLayout(fac.coordinates);
+            trainLayout = draw.DrawPersonLayout(trainLayout, peopleToDraw);
+
+            Console.WriteLine("DISPLAYED NEW IMAGE");
+            //dislay new persenLayout and background
+            railRoadMap.BackgroundImage = background;
+            railRoadMap.Image = trainLayout;
 
 
+        }
         private void Form1_Load(object sender, EventArgs e)
         {
 

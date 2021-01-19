@@ -5,11 +5,10 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace RailRoadSimulator.Factories.LayoutFactory
+namespace RailRoadSimulator
 {
 	public class Station : ILayout
 	{
-		public string classification { get; set; } //amount of stars a room has
 		public Station(Tile temp)
 		{
 			areaType = temp.areaType;

@@ -9,7 +9,7 @@ using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace RailRoadSimulator.Factories.LayoutFactory
+namespace RailRoadSimulator
 {
 	public class LayoutFactory : AbstractFactory
 	{
@@ -113,7 +113,7 @@ namespace RailRoadSimulator.Factories.LayoutFactory
             //if not, return the temp room.
             else
             {
-                string nspace = "RailRoadSimulator.Factories.LayoutFactory";
+                string nspace = "RailRoadSimulator";
 
                 //query for all the types
                 var q = from x in Assembly.GetExecutingAssembly().GetTypes()

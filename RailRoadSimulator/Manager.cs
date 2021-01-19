@@ -5,9 +5,8 @@ using System.Linq;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Windows.Forms;
 using RailroadEvents;
-using RailRoadSimulator.Factories.EntityFactory;
-using RailRoadSimulator.Factories.LayoutFactory;
 using RailRoadSimulator.Pathfinding;
 
 namespace RailRoadSimulator
@@ -17,7 +16,10 @@ namespace RailRoadSimulator
 		MainForm main { get; set; }
 		string itemKey { get; set; }
 		string itemValue { get; set; }
+		public Dictionary<IEntity, Tile> people = new Dictionary<IEntity, Tile>();
+		public Dictionary<IEntity, ILayout> trains = new Dictionary<IEntity, ILayout>();
 
+		EntityFactory fac = new EntityFactory();
 		public ILayout[,] coordinates { get; set; }
 		PathFinding path = new PathFinding();
 		public Manager(ILayout[,] coordinates, MainForm main)
@@ -31,6 +33,7 @@ namespace RailRoadSimulator
 			//To speed up for testing
 			RailroadEventManager.RRTE_Factor = RailroadEventManager.RRTE_Factor * 4f;
 		}
+
 		//Adapter pattern
 		public void Notify(RailroadEvent evt)
 		{
@@ -58,7 +61,7 @@ namespace RailRoadSimulator
 			if (evt.EventType == RailroadEventType.SPAWN_TRAIN)
 			{
 				TempIdentity temp = new TempIdentity();
-
+				temp.areaType = "Train";
 				foreach (var item in coordinates) {
 					if (item != null) {
 						if (item.areaType == "Station" && item.whatIsIt == Char.Parse(itemValue)) {
@@ -90,7 +93,7 @@ namespace RailRoadSimulator
 				//Value is startlocation of train
 				Console.WriteLine("Amount of wagons Key is: " + itemKey);
 				Console.WriteLine("Amoubt of wagons Value is: " + itemValue);
-				
+
 
 
 			}
@@ -98,7 +101,7 @@ namespace RailRoadSimulator
 			{
 				//create new person/passanger
 				TempIdentity temp = new TempIdentity();
-
+				temp.areaType = "Person";
 				foreach (var item in coordinates)
 				{
 					if (item != null)
@@ -117,10 +120,16 @@ namespace RailRoadSimulator
 						}
 					}
 				}
+				Tile end = new Tile();
+				end.X = temp.endX;
+				end.Y = temp.endY;
+
 				Person person = new Person(temp);
 				//debug purposes
 				person.startLoc = itemKey;
 				person.endLoc = itemValue;
+
+				people.Add((Person)fac.GetPerson("Person", temp), end);
 
 				//set startcoordinates
 				//check if train is at station, if so then step in train
@@ -131,36 +140,39 @@ namespace RailRoadSimulator
 				//Value is end station
 				Console.WriteLine("Person spawned, Station Key is: " + itemKey);
 				Console.WriteLine("Person spawned, Station Value is: " + itemValue);
-				
+
 
 			}
 			else if (evt.EventType == RailroadEventType.CLEANING_EMERGENCY)
 			{
 				//clean everything, so create maids
-					Console.WriteLine("Cleaning emergency Key is: " + itemKey);
-					Console.WriteLine("Cleaning emergency Value is: " + itemValue);
-				
+				Console.WriteLine("Cleaning emergency Key is: " + itemKey);
+				Console.WriteLine("Cleaning emergency Value is: " + itemValue);
+
 
 			}
 			else if (evt.EventType == RailroadEventType.LEAVES_ON_TRACK)
 			{
 				Stopwatch watch = new Stopwatch();
 				watch.Start();
-				
+
 				//leaves on track so slow game by half
 				RailroadEventManager.RRTE_Factor = RailroadEventManager.RRTE_Factor / 2f;
-				//timer.Interval = timer.Interval * 2;
+				//main.timer.Interval = main.timer.Interval / 2;
 
 				//Slow down RRTE factor by half
 				//Key is duration
 				//Value is how many seconds and then normal again
 				Console.WriteLine("Leaves on track Key is: " + itemKey);
 				Console.WriteLine("Leaves on track Value is: " + itemValue);
-				while (watch.ElapsedMilliseconds != 10000) {
+				//while (watch.ElapsedMilliseconds != 10000)
+				//{
 
-				}
+				//}
+			
 				Console.WriteLine("10 Seconds have passed, speed up again");
 				RailroadEventManager.RRTE_Factor = RailroadEventManager.RRTE_Factor * 2f;
+				//main.timer.Interval = main.timer.Interval * 2;
 				watch.Stop();
 
 			}

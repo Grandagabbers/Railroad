@@ -5,7 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace RailRoadSimulator.Factories.EntityFactory
+namespace RailRoadSimulator
 {
 	public class Train : IEntity
 	{
@@ -16,6 +16,7 @@ namespace RailRoadSimulator.Factories.EntityFactory
 
 		public Train(TempIdentity temp)
 		{
+			areaType = temp.areaType;
 			X = temp.X;
 			Y = temp.Y;
 			model = Image.FromFile(@"..\..\Assets\train.png");

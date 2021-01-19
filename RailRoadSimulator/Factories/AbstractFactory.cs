@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace RailRoadSimulator.Factories
+namespace RailRoadSimulator
 {
     public interface AbstractFactory
     {
