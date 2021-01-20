@@ -16,9 +16,10 @@ namespace RailRoadSimulator
 		MainForm main { get; set; }
 		string itemKey { get; set; }
 		string itemValue { get; set; }
+		public bool evacuation { get; set; } = false;
 		public Dictionary<IEntity, Tile> people = new Dictionary<IEntity, Tile>();
 		public Dictionary<IEntity, ILayout> trains = new Dictionary<IEntity, ILayout>();
-
+		List<string> layout = new List<string>();
 		EntityFactory fac = new EntityFactory();
 		public ILayout[,] coordinates { get; set; }
 		PathFinding path = new PathFinding();
@@ -26,13 +27,34 @@ namespace RailRoadSimulator
 		{
 			this.main = main;
 			this.coordinates = coordinates;
-
+			layout = System.IO.File.ReadAllLines(@"..\..\simple-8.trc").ToList<String>();
 			//CreateGraph(coordinates);
 
 			RailroadEventManager.Register(this);
 			//To speed up for testing
 			RailroadEventManager.RRTE_Factor = RailroadEventManager.RRTE_Factor * 4f;
 		}
+
+		public void FindPath(KeyValuePair<IEntity, Tile> current)
+		{
+			Person person = (Person)current.Key;
+			List<Tile> trainPath = path.findTiles(layout, person, current.Value);
+			List<Tile> last = person.eventQueue.LastOrDefault();
+			//if (end.danger == true)
+			//{
+			//	current.eventQueue.AddFirst(trainPath);
+			//}
+
+
+			person.eventQueue.AddLast(trainPath);
+			person.route = trainPath;
+			
+			if (person.eventQueue.Count > 1 && last.Last() == person.eventQueue.Last().Last())
+			{
+				person.eventQueue.RemoveLast();
+			}
+		}
+
 
 		//Adapter pattern
 		public void Notify(RailroadEvent evt)
@@ -101,28 +123,33 @@ namespace RailRoadSimulator
 			{
 				//create new person/passanger
 				TempIdentity temp = new TempIdentity();
+				//create the tile they want to go to
+				Tile end = new Tile();
+
 				temp.areaType = "Person";
 				foreach (var item in coordinates)
 				{
 					if (item != null)
 					{
-						if (item.areaType == "Station" && item.whatIsIt == itemKey.Last())
-						{
-							temp.X = item.X;
-							temp.Y = item.Y;
-							break;
+						if (temp.X != item.X || temp.Y != item.Y) {
+							if (item.areaType == "Station" && item.whatIsIt == itemKey.Last())
+							{
+								temp.X = item.X;
+								temp.Y = item.Y;
+							}
 						}
-						if (item.areaType == "Station" && item.whatIsIt == itemValue.Last())
-						{
-							temp.endX = item.X;
-							temp.endY = item.Y;
-							break;
+						if (temp.endX != item.X || temp.endY != item.Y) {
+							if (item.areaType == "Station" && item.whatIsIt == itemValue.Last())
+							{
+								temp.endX = item.X;
+								temp.endY = item.Y;
+								end.X = item.X;
+								end.Y = item.Y;
+							}
 						}
 					}
 				}
-				Tile end = new Tile();
-				end.X = temp.endX;
-				end.Y = temp.endY;
+
 
 				Person person = new Person(temp);
 				//debug purposes
@@ -130,7 +157,7 @@ namespace RailRoadSimulator
 				person.endLoc = itemValue;
 
 				people.Add((Person)fac.GetPerson("Person", temp), end);
-
+				FindPath(people.Last());
 				//set startcoordinates
 				//check if train is at station, if so then step in train
 				//start timer, if person waits too long for train -> delete person: he dies
@@ -181,8 +208,6 @@ namespace RailRoadSimulator
 				char startLocation = itemKey.First<char>();
 				//start the train
 				//start pathfinding at station itemKey
-				var finalLay = System.IO.File.ReadAllLines(@"..\..\simple-8.trc").ToList<String>();
-				path.findTiles(finalLay, startLocation, 'C');
 
 				//Key is where to go from?
 				//value is null

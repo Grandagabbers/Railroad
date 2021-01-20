@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Drawing;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -10,7 +11,7 @@ namespace RailRoadSimulator.Pathfinding
 	public class PathFinding
 	{
 		//final list to go
-		List<Tile> finalList = new List<Tile>();
+		List<Tile> finalList;
 
 		/// <summary>
 		/// This finds the path
@@ -18,17 +19,20 @@ namespace RailRoadSimulator.Pathfinding
 		/// <param name="map">the layout of the map</param>
 		/// <param name="startLoc">startlocation</param>
 		/// <param name="endLoc">endlocation</param>
-		public List<Tile> findTiles(List<string> map, char startLoc, char endLoc)
+		public List<Tile> findTiles(List<string> map, Person startLoc, Tile finish)
 		{
+			finalList = new List<Tile>();
 			//This gets the start coordinates of the train
 			var start = new Tile();
-			start.Y = map.FindIndex(x => x.Contains(startLoc));
-			start.X = map[start.Y].IndexOf(startLoc);
+			start.X = startLoc.X;
+			start.Y = startLoc.Y;
+			//start.Y = map.FindIndex(x => x.Contains(startLoc));
+			//start.X = map[start.Y].IndexOf(startLoc);
 
 			//This gets the end coordinates of the train
-			var finish = new Tile();
-			finish.Y = map.FindIndex(x => x.Contains(endLoc));
-			finish.X = map[finish.Y].IndexOf(endLoc);
+			//var finish = new Tile();
+			//finish.Y = map.FindIndex(x => x.Contains(endLoc));
+			//finish.X = map[finish.Y].IndexOf(endLoc);
 
 			start.SetDistance(finish.X, finish.Y);
 
@@ -49,7 +53,7 @@ namespace RailRoadSimulator.Pathfinding
 					while (true)
 					{
 						Console.WriteLine($"{tile.X} : {tile.Y}");
-						if (map[tile.Y][tile.X] != startLoc || map[tile.Y][tile.X] != ' ' || map[tile.Y][tile.X] != endLoc)
+						if (map[tile.Y][tile.X] != start.whatIsIt || map[tile.Y][tile.X] != ' ' || map[tile.Y][tile.X] != finish.whatIsIt)
 						{
 							//convert the tiles with their coordinates to the right path
 							var newMapRow = map[tile.Y].ToCharArray();
@@ -64,7 +68,6 @@ namespace RailRoadSimulator.Pathfinding
 							finalList.Reverse();
 							Console.WriteLine("Map looks like :");
 							map.ForEach(x => Console.WriteLine(x));
-							Console.WriteLine("Done!");
 							return finalList;
 						}
 					}
@@ -73,7 +76,7 @@ namespace RailRoadSimulator.Pathfinding
 				visitedTiles.Add(checkTile);
 				activeTiles.Remove(checkTile);
 
-				var walkableTiles = GetWalkableTiles(map, checkTile, finish, endLoc);
+				var walkableTiles = GetWalkableTiles(map, checkTile, finish);
 
 				foreach (var walkableTile in walkableTiles)
 				{
@@ -110,7 +113,7 @@ namespace RailRoadSimulator.Pathfinding
 		/// <param name="targetTile">target tile to go to</param>
 		/// <param name="endLoc">end location</param>
 		/// <returns>next possible tiles in a list</returns>
-		private static List<Tile> GetWalkableTiles(List<string> map, Tile currentTile, Tile targetTile, char endLoc)
+		private static List<Tile> GetWalkableTiles(List<string> map, Tile currentTile, Tile targetTile)
 		{
 			var possibleTiles = new List<Tile>()
 			{
