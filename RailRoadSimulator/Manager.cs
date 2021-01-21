@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Drawing;
 using System.Linq;
 using System.Text;
 using System.Threading;
@@ -17,8 +18,8 @@ namespace RailRoadSimulator
 		string itemKey { get; set; }
 		string itemValue { get; set; }
 		public bool evacuation { get; set; } = false;
-		public Dictionary<IEntity, Tile> people = new Dictionary<IEntity, Tile>();
-		public Dictionary<IEntity, Tile> trains = new Dictionary<IEntity, Tile>();
+		public List<IEntity> people = new List<IEntity>();
+		public List<IEntity> trains = new List<IEntity>();
 		List<string> layout = new List<string>();
 		EntityFactory fac = new EntityFactory();
 		public ILayout[,] coordinates { get; set; }
@@ -35,30 +36,53 @@ namespace RailRoadSimulator
 			RailroadEventManager.RRTE_Factor = RailroadEventManager.RRTE_Factor * 4f;
 		}
 
-		public void FindPath(KeyValuePair<IEntity, Tile> current)
+		public void FindPath(IEntity current)
 		{
-			Person person = (Person)current.Key;
-			List<Tile> trainPath = path.findTiles(layout, person, current.Value);
-			List<Tile> last = person.eventQueue.LastOrDefault();
+			Tile endTile = new Tile();
+			endTile.X = current.endX;
+			endTile.Y = current.endY;
+			List<Tile> trainPath = path.findTiles(layout, (Train)current, endTile);
+			List<Tile> last = current.eventQueue.LastOrDefault();
 
-			person.eventQueue.AddLast(trainPath);
-			person.route = trainPath;
-			
-			if (person.eventQueue.Count > 1 && last.Last() == person.eventQueue.Last().Last())
+			current.eventQueue.AddLast(trainPath);
+			current.route = trainPath;
+
+			if (current.eventQueue.Count > 1 && last.Last() == current.eventQueue.Last().Last())
 			{
-				person.eventQueue.RemoveLast();
+				current.eventQueue.RemoveLast();
 			}
 		}
 
 
-		private void AddToTrain(Person person, KeyValuePair<IEntity, Tile> train) {
-			var current = (Train)train.Key;
+		public void AddToTrain(IEntity person, Train train) {
 
-			if (current.personsInTrain.Count < current.capacity) {
-				current.personsInTrain.Add(person, person.endLoc);
+			if (train.personsInTrain.Count < train.capacity)
+			{
+				train.personsInTrain.Add((Person)person);
+				//remove person because it is in train
+				people.Remove(person);
 			}
-			Console.WriteLine("current train is full");
-			
+			else
+			{
+				Dictionary<Point, int> amount = new Dictionary<Point, int>();
+				Console.WriteLine("current train is full");
+				foreach (var item in train.personsInTrain)
+				{
+					Point test = new Point(item.endX, item.endY);	
+					if (amount.Keys.Contains(test))
+					{
+						amount[test] = amount.Values.First() + 1;
+					}
+					else
+					{
+						amount.Add(test, 1);
+					}
+				}
+				var keyOfMaxValue = amount.Aggregate((x, y) => x.Value > y.Value ? x : y).Key; // "a"
+				train.endX = keyOfMaxValue.X;
+				train.endY = keyOfMaxValue.Y;
+				FindPath(train);
+			}
 		}
 
 		//Adapter pattern
@@ -79,15 +103,12 @@ namespace RailRoadSimulator
 			if (evt.EventType == RailroadEventType.SPAWN_TRAIN)
 			{
 				TempIdentity temp = new TempIdentity();
-				//create the tile they want to go to
-				Tile end = new Tile();
 				temp.areaType = "Train";
 				foreach (var item in coordinates) {
 					if (item != null) {
 						if (item.areaType == "Station" && item.whatIsIt == Char.Parse(itemValue)) {
 							temp.X = item.X;
 							temp.Y = item.Y;
-							break;
 						}
 					}
 				}
@@ -107,21 +128,16 @@ namespace RailRoadSimulator
 				}
 				temp.amountOfWagons = number;
 				//Spawn a train
-				trains.Add((Train)fac.GetPerson("Train", temp), end);
+				trains.Add((Train)fac.GetPerson("Train", temp));
 				//Key is amount of wagons
 				//Value is startlocation of train
 				Console.WriteLine("Amount of wagons Key is: " + itemKey);
 				Console.WriteLine("Amoubt of wagons Value is: " + itemValue);
-
-
-
 			}
 			else if (evt.EventType == RailroadEventType.SPAWN_PASSENGER)
 			{
 				//create new person/passanger
 				TempIdentity temp = new TempIdentity();
-				//create the tile they want to go to
-				Tile end = new Tile();
 
 				temp.areaType = "Person";
 				foreach (var item in coordinates)
@@ -135,35 +151,30 @@ namespace RailRoadSimulator
 								temp.Y = item.Y;
 							}
 						}
-						if (temp.endX != item.X || temp.endY != item.Y) {
+						if (temp.endX != item.X || temp.endY != item.Y)
+						{
 							if (item.areaType == "Station" && item.whatIsIt == itemValue.Last())
 							{
 								temp.endX = item.X;
 								temp.endY = item.Y;
-								end.X = item.X;
-								end.Y = item.Y;
+								temp.endStationName = itemValue.Last();
 							}
 						}
+
 					}
 				}
 
-
-				Person person = new Person(temp);
-				//debug purposes
-				person.startLoc = itemKey;
-				person.endLoc = itemValue;
-
-				people.Add((Person)fac.GetPerson("Person", temp), end);
+				people.Add((Person)fac.GetPerson("Person", temp));
 
 				foreach (var item in trains)
 				{
-					if (item.Key.X == people.Keys.First().X && item.Key.Y == people.Keys.First().Y)
+					if (item.X == people.First().X && item.Y == people.First().Y)
 					{
-						AddToTrain((Person)people.Keys.First(), item);
+						AddToTrain(people.First(), (Train)item);
 					}
 				}
 
-				FindPath(people.Last());
+				//FindPath(people.Last());
 				//set startcoordinates
 				//check if train is at station, if so then step in train
 				//start timer, if person waits too long for train -> delete person: he dies
@@ -171,8 +182,8 @@ namespace RailRoadSimulator
 
 				//Key is start station
 				//Value is end station
-				Console.WriteLine("Person spawned, Station Key is: " + itemKey);
-				Console.WriteLine("Person spawned, Station Value is: " + itemValue);
+				//Console.WriteLine("Person spawned, Station Key is: " + itemKey);
+				//Console.WriteLine("Person spawned, Station Value is: " + itemValue);
 
 
 			}

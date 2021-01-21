@@ -10,11 +10,14 @@ namespace RailRoadSimulator
 	public abstract class IEntity
 	{
         public string areaType { get; set; }
-        public int timeBusyEvent { get; set; } //keeps track of much time  a person spent so far in a event
         public bool eventStarted { get; set; } = false;
         public int X { get; set; }
 		public int Y { get; set; }
-		public Image model { get; set; }
+        public int endX { get; set; }
+        public int endY { get; set; }
+        public char endStationName { get; set; }
+        public int timeBusyEvent { get; set; } //keeps track of much time  a person spent so far in a event
+        public Image model { get; set; }
         public LinkedList<List<Tile>> eventQueue = new LinkedList<List<Tile>>();// a queue containing routes that the person must walk in the future. 
         public int amountOfWagons { get; set; } = 0;
         public ILayout currentRoom { get; set; }//room where the person is atm

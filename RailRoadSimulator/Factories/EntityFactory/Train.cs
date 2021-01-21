@@ -12,13 +12,13 @@ namespace RailRoadSimulator
 		public string destination { get; set; }
 		public string startLocation { get; set; }
 		public Image wagonModel { get; set; }
-		public int capacity { get; set; } = 10;
+		public int capacity { get; set; } = 1;
 		//List of people in the train and where they want to go
-		public Dictionary<Person, string> personsInTrain { get; set; }
+		public List<Person> personsInTrain { get; set; }
 
 		public Train(TempIdentity temp)
 		{
-			personsInTrain = new Dictionary<Person, string>();
+			personsInTrain = new List<Person>();
 			amountOfWagons = temp.amountOfWagons;
 			areaType = temp.areaType;
 			X = temp.X;
@@ -29,7 +29,7 @@ namespace RailRoadSimulator
 			{
 				for (int i = 0; i != amountOfWagons; i++)
 				{
-					capacity = capacity + 10;
+					capacity = capacity + 1;
 					wagonModel = Image.FromFile(@"..\..\Assets\train.png");
 					model.RotateFlip(RotateFlipType.Rotate180FlipX);//rotate image so its correctly displayed
 				}

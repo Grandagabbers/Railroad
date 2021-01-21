@@ -9,9 +9,6 @@ namespace RailRoadSimulator
 {
 	public class TempIdentity : IEntity
 	{
-		public int endX { get; set; }
-		public int endY { get; set; }
-
 		public TempIdentity()
 		{
 

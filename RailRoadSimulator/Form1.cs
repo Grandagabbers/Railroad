@@ -26,7 +26,8 @@ namespace RailRoadSimulator
         private Draw draw = new Draw();
         private LayoutFactory fac = new LayoutFactory();
 
-        public Dictionary<IEntity, Tile> peopleToDraw = new Dictionary<IEntity, Tile>();
+        public List<IEntity> trainsToDraw = new List<IEntity>();
+        public List<IEntity> newPeople = new List<IEntity>();
         //private Factory
 
 
@@ -86,30 +87,49 @@ namespace RailRoadSimulator
             trainLayout.Dispose();//empty the Bitmap
             trainLayout = new Bitmap(background.Width, background.Height); //create new one
 
+            if (newPeople != manager.people.ToList())
+            {
+                newPeople.Clear();
+
+                foreach (var people in manager.people.ToList())
+                {
+                    IEntity last = manager.people.Last();
+                    newPeople.Add(people);
+                    foreach (var item in manager.trains)
+                    {
+                        if (item.X == people.X && item.Y == people.Y)
+                        {
+                            manager.AddToTrain(people, (Train)item);
+                        }
+                    }
+                }
+
+            }
+
             //if there are changes in the simulation
             //update personlayout 
-            if (peopleToDraw != manager.trains)
+            if (trainsToDraw != manager.trains.ToList())
             {
-                peopleToDraw.Clear();//empty the list 
+                trainsToDraw.Clear();//empty the list 
 
                 //foreach person in manager.people add it to peopleToDraw
-                foreach (KeyValuePair<IEntity, Tile> train in manager.trains)
+                foreach (var train in manager.trains.ToList())
                 {
-                    IEntity last = manager.trains.Keys.Last();
-                    peopleToDraw.Add(train.Key, train.Value);
+                    IEntity last = manager.trains.Last();
+                    trainsToDraw.Add(train);
 
                     //if person has a path to walk. go walk
-                    if (train.Key.route != null && train.Key.route.Count > 0)
+                    if (train.route != null && train.route.Count > 0)
                     {
                         bool wait = false;
 
                         if (wait == false)//if wait is false. The person is not in a elevator so it can continue moving. 
                         {
-                            train.Key.WalkTo();
-                            ILayout check = fac.coordinates[train.Key.X, train.Key.Y];
+                            train.WalkTo();
+                            ILayout check = fac.coordinates[train.X, train.Y];
                             if (check != null && fac.coordinates[check.X, check.Y] == check)
                             {
-                                train.Key.currentRoom = check;
+                                train.currentRoom = check;
                             }
 
                         }
@@ -122,7 +142,7 @@ namespace RailRoadSimulator
             //draw the new personLayout and background
             background.Dispose();
             background = draw.DrawLayout(fac.coordinates);
-            trainLayout = draw.DrawPersonLayout(trainLayout, peopleToDraw);
+            trainLayout = draw.DrawPersonLayout(trainLayout, trainsToDraw);
 
             Console.WriteLine("DISPLAYED NEW IMAGE");
             //dislay new persenLayout and background
@@ -139,8 +159,8 @@ namespace RailRoadSimulator
         /// <param name="e"></param>
         public void UpdateEvents(object sender, EventArgs e)
         {
-            IEntity last = manager.people.Keys.LastOrDefault();
-            foreach (IEntity person in peopleToDraw.Keys)
+            IEntity last = manager.trains.LastOrDefault();
+            foreach (IEntity person in trainsToDraw.ToList())
             {
 
                 //if (person.id.Contains("Maid")) //checks if the person is from the maid class
@@ -167,7 +187,7 @@ namespace RailRoadSimulator
                 //    }
                 //}
                 //else
-                if (person.areaType.Contains("Person")) //checks if the person is from the customer class
+                if (person.areaType.Contains("Train")) //checks if the person is from the customer class
                 {
 
                     if ((person.eventQueue.Count > 0 && person.eventQueue.FirstOrDefault().LastOrDefault().X == person.X && person.eventQueue.FirstOrDefault().LastOrDefault().Y == person.Y))//selects shortest path to the final destination of its event.
@@ -297,7 +317,7 @@ namespace RailRoadSimulator
 
             //    }
             //}
-            foreach (IEntity person in manager.people.Keys)// if a event hasnt started, set timertickcount equal to person time.
+            foreach (IEntity person in manager.trains)// if a event hasnt started, set timertickcount equal to person time.
             {
 
                 if (person.eventStarted == false)

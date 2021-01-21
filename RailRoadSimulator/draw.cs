@@ -49,11 +49,11 @@ namespace RailRoadSimulator
         /// <param name="personLayout">bitmap to draw on</param>
         /// <param name="people">persons to draw</param>
         /// <returns>personLaoyout with the drawn persons</returns>
-        public Bitmap DrawPersonLayout(Bitmap personLayout, Dictionary<IEntity, Tile> people)
+        public Bitmap DrawPersonLayout(Bitmap personLayout, List<IEntity> trains)
         {
             //Foreach person in people
             //Draw it on the bitmap
-            foreach (IEntity everyPerson in people.Keys)
+            foreach (IEntity everyPerson in trains)
             {
                 personLayout = everyPerson.DrawPerson((Bitmap)personLayout, drawSizeItem);
             }

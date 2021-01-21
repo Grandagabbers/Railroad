@@ -19,7 +19,7 @@ namespace RailRoadSimulator.Pathfinding
 		/// <param name="map">the layout of the map</param>
 		/// <param name="startLoc">startlocation</param>
 		/// <param name="endLoc">endlocation</param>
-		public List<Tile> findTiles(List<string> map, Person startLoc, Tile finish)
+		public List<Tile> findTiles(List<string> map, Train startLoc, Tile finish)
 		{
 			finalList = new List<Tile>();
 			//This gets the start coordinates of the train
