@@ -16,7 +16,7 @@ namespace RailRoadSimulator
 		public int Y { get; set; }
 		public Image model { get; set; }
         public LinkedList<List<Tile>> eventQueue = new LinkedList<List<Tile>>();// a queue containing routes that the person must walk in the future. 
-
+        public int amountOfWagons { get; set; } = 0;
         public ILayout currentRoom { get; set; }//room where the person is atm
 
         private int imageWidth = 60; //width of the person in pixels
@@ -54,7 +54,7 @@ namespace RailRoadSimulator
         public Bitmap DrawPerson(Bitmap person, int sizeRoom)
         {
 
-            if (this.areaType.Contains("Train"))//draw maid
+            if (this.areaType.Contains("Train"))//draw train
             {
 
                 using (Graphics g = Graphics.FromImage(person))

@@ -9,27 +9,33 @@ namespace RailRoadSimulator
 {
 	public class Train : IEntity
 	{
-		public int amountOfWagons { get; set; } = 0;
 		public string destination { get; set; }
 		public string startLocation { get; set; }
 		public Image wagonModel { get; set; }
+		public int capacity { get; set; } = 10;
+		//List of people in the train and where they want to go
+		public Dictionary<Person, string> personsInTrain { get; set; }
 
 		public Train(TempIdentity temp)
 		{
+			personsInTrain = new Dictionary<Person, string>();
+			amountOfWagons = temp.amountOfWagons;
 			areaType = temp.areaType;
 			X = temp.X;
 			Y = temp.Y;
 			model = Image.FromFile(@"..\..\Assets\train.png");
 			model.RotateFlip(RotateFlipType.Rotate180FlipX);//rotate image so its correctly displayed
-			if (amountOfWagons > 0)
+			if (amountOfWagons > 1)
 			{
 				for (int i = 0; i != amountOfWagons; i++)
 				{
+					capacity = capacity + 10;
 					wagonModel = Image.FromFile(@"..\..\Assets\train.png");
 					model.RotateFlip(RotateFlipType.Rotate180FlipX);//rotate image so its correctly displayed
 				}
 
 			}
 		}
+
 	}
 }

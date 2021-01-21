@@ -88,28 +88,28 @@ namespace RailRoadSimulator
 
             //if there are changes in the simulation
             //update personlayout 
-            if (peopleToDraw != manager.people)
+            if (peopleToDraw != manager.trains)
             {
                 peopleToDraw.Clear();//empty the list 
 
                 //foreach person in manager.people add it to peopleToDraw
-                foreach (KeyValuePair<IEntity, Tile> person in manager.people)
+                foreach (KeyValuePair<IEntity, Tile> train in manager.trains)
                 {
-                    IEntity last = manager.people.Keys.Last();
-                    peopleToDraw.Add(person.Key, person.Value);
+                    IEntity last = manager.trains.Keys.Last();
+                    peopleToDraw.Add(train.Key, train.Value);
 
                     //if person has a path to walk. go walk
-                    if (person.Key.route != null && person.Key.route.Count > 0)
+                    if (train.Key.route != null && train.Key.route.Count > 0)
                     {
                         bool wait = false;
 
                         if (wait == false)//if wait is false. The person is not in a elevator so it can continue moving. 
                         {
-                            person.Key.WalkTo();
-                            ILayout check = fac.coordinates[person.Key.X, person.Key.Y];
+                            train.Key.WalkTo();
+                            ILayout check = fac.coordinates[train.Key.X, train.Key.Y];
                             if (check != null && fac.coordinates[check.X, check.Y] == check)
                             {
-                                person.Key.currentRoom = check;
+                                train.Key.currentRoom = check;
                             }
 
                         }

@@ -18,7 +18,7 @@ namespace RailRoadSimulator
 		string itemValue { get; set; }
 		public bool evacuation { get; set; } = false;
 		public Dictionary<IEntity, Tile> people = new Dictionary<IEntity, Tile>();
-		public Dictionary<IEntity, ILayout> trains = new Dictionary<IEntity, ILayout>();
+		public Dictionary<IEntity, Tile> trains = new Dictionary<IEntity, Tile>();
 		List<string> layout = new List<string>();
 		EntityFactory fac = new EntityFactory();
 		public ILayout[,] coordinates { get; set; }
@@ -40,11 +40,6 @@ namespace RailRoadSimulator
 			Person person = (Person)current.Key;
 			List<Tile> trainPath = path.findTiles(layout, person, current.Value);
 			List<Tile> last = person.eventQueue.LastOrDefault();
-			//if (end.danger == true)
-			//{
-			//	current.eventQueue.AddFirst(trainPath);
-			//}
-
 
 			person.eventQueue.AddLast(trainPath);
 			person.route = trainPath;
@@ -56,18 +51,19 @@ namespace RailRoadSimulator
 		}
 
 
+		private void AddToTrain(Person person, KeyValuePair<IEntity, Tile> train) {
+			var current = (Train)train.Key;
+
+			if (current.personsInTrain.Count < current.capacity) {
+				current.personsInTrain.Add(person, person.endLoc);
+			}
+			Console.WriteLine("current train is full");
+			
+		}
+
 		//Adapter pattern
 		public void Notify(RailroadEvent evt)
 		{
-			//if message is 'Someone puked'
-			//eventtype = cleaning emergency is fired
-
-			//if message is 'Slippery! Reduce speed by half'
-			//eventtype = leaves on track is called
-
-
-			//Console.WriteLine("Event fired, message is:  " + evt.Message);
-			//Console.WriteLine("EventType is:  " + evt.EventType);
 
 			//check if data is not null, if so fill variables with given data of that event
 			if (evt.Data != null)
@@ -83,6 +79,8 @@ namespace RailRoadSimulator
 			if (evt.EventType == RailroadEventType.SPAWN_TRAIN)
 			{
 				TempIdentity temp = new TempIdentity();
+				//create the tile they want to go to
+				Tile end = new Tile();
 				temp.areaType = "Train";
 				foreach (var item in coordinates) {
 					if (item != null) {
@@ -93,8 +91,6 @@ namespace RailRoadSimulator
 						}
 					}
 				}
-				//Spawn a train
-				Train train = new Train(temp);
 				int number = 0;
 				string extract = "";
 				//this is a string now, maybe convert the string to int
@@ -109,8 +105,9 @@ namespace RailRoadSimulator
 				{
 					number = int.Parse(extract);
 				}
-				train.amountOfWagons = number;
-				train.startLocation = itemValue;
+				temp.amountOfWagons = number;
+				//Spawn a train
+				trains.Add((Train)fac.GetPerson("Train", temp), end);
 				//Key is amount of wagons
 				//Value is startlocation of train
 				Console.WriteLine("Amount of wagons Key is: " + itemKey);
@@ -157,6 +154,15 @@ namespace RailRoadSimulator
 				person.endLoc = itemValue;
 
 				people.Add((Person)fac.GetPerson("Person", temp), end);
+
+				foreach (var item in trains)
+				{
+					if (item.Key.X == people.Keys.First().X && item.Key.Y == people.Keys.First().Y)
+					{
+						AddToTrain((Person)people.Keys.First(), item);
+					}
+				}
+
 				FindPath(people.Last());
 				//set startcoordinates
 				//check if train is at station, if so then step in train
