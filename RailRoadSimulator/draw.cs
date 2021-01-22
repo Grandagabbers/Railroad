@@ -9,7 +9,7 @@ namespace RailRoadSimulator
 {
 	public class Draw
 	{
-        public int drawSizeItem { get; } = 50;
+        public int drawSizeItem { get; } = 40;
 		public Draw()
 		{
 

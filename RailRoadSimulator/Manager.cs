@@ -28,7 +28,7 @@ namespace RailRoadSimulator
 		{
 			this.main = main;
 			this.coordinates = coordinates;
-			layout = System.IO.File.ReadAllLines(@"..\..\simple-8.trc").ToList<String>();
+			layout = System.IO.File.ReadAllLines(@"..\..\final-assignment.trc").ToList<String>();
 			//CreateGraph(coordinates);
 
 			RailroadEventManager.Register(this);
@@ -36,22 +36,38 @@ namespace RailRoadSimulator
 			RailroadEventManager.RRTE_Factor = RailroadEventManager.RRTE_Factor * 4f;
 		}
 
-		public void FindPath(IEntity current)
+		public void FindPath(Train current)
 		{
+			Dictionary<Point, int> amount = new Dictionary<Point, int>();
+			//Console.WriteLine("current train is full");
+			foreach (var item in current.personsInTrain)
+			{
+				Point test = new Point(item.endX, item.endY);
+				if (amount.Keys.Contains(test))
+				{
+					amount[test] = amount.Values.First() + 1;
+				}
+				else
+				{
+					amount.Add(test, 1);
+				}
+			}
+			var keyOfMaxValue = amount.Aggregate((x, y) => x.Value > y.Value ? x : y).Key; // "a"
+			current.endX = keyOfMaxValue.X;
+			current.endY = keyOfMaxValue.Y;
+
+			//make the endTile of the train
 			Tile endTile = new Tile();
 			endTile.X = current.endX;
 			endTile.Y = current.endY;
-			List<Tile> trainPath = path.findTiles(layout, (Train)current, endTile);
+			List<Tile> trainPath = path.findTiles(layout, current, endTile);
 			List<Tile> last = current.eventQueue.LastOrDefault();
 
 			current.eventQueue.AddLast(trainPath);
 			current.route = trainPath;
+			current.eventQueue.RemoveLast();
 
-			if (current.eventQueue.Count > 1 && last.Last() == current.eventQueue.Last().Last())
-			{
-				current.eventQueue.RemoveLast();
 			}
-		}
 
 
 		public void AddToTrain(IEntity person, Train train) {
@@ -64,23 +80,6 @@ namespace RailRoadSimulator
 			}
 			else
 			{
-				Dictionary<Point, int> amount = new Dictionary<Point, int>();
-				Console.WriteLine("current train is full");
-				foreach (var item in train.personsInTrain)
-				{
-					Point test = new Point(item.endX, item.endY);	
-					if (amount.Keys.Contains(test))
-					{
-						amount[test] = amount.Values.First() + 1;
-					}
-					else
-					{
-						amount.Add(test, 1);
-					}
-				}
-				var keyOfMaxValue = amount.Aggregate((x, y) => x.Value > y.Value ? x : y).Key; // "a"
-				train.endX = keyOfMaxValue.X;
-				train.endY = keyOfMaxValue.Y;
 				FindPath(train);
 			}
 		}

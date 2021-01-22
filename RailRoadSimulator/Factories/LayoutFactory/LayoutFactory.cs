@@ -39,7 +39,7 @@ namespace RailRoadSimulator
         private void DeserializeLayout()
         {
             //var json = File.ReadAllLines(@"..\..\final-assignment.trc");
-            finalLay = File.ReadAllLines(@"..\..\simple-8.trc").ToList();
+            finalLay = File.ReadAllLines(@"..\..\final-assignment.trc").ToList();
 
             int y = 0;
             foreach (var singleLine in finalLay)

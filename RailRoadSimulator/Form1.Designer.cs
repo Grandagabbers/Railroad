@@ -36,7 +36,7 @@
 			// 
 			this.railRoadMap.Location = new System.Drawing.Point(21, 12);
 			this.railRoadMap.Name = "railRoadMap";
-			this.railRoadMap.Size = new System.Drawing.Size(1380, 547);
+			this.railRoadMap.Size = new System.Drawing.Size(1677, 712);
 			this.railRoadMap.SizeMode = System.Windows.Forms.PictureBoxSizeMode.AutoSize;
 			this.railRoadMap.TabIndex = 0;
 			this.railRoadMap.TabStop = false;
@@ -46,7 +46,7 @@
 			// 
 			this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
 			this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-			this.ClientSize = new System.Drawing.Size(1410, 570);
+			this.ClientSize = new System.Drawing.Size(1710, 736);
 			this.Controls.Add(this.railRoadMap);
 			this.Name = "MainForm";
 			this.Text = "Form1";

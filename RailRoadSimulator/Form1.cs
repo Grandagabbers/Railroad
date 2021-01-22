@@ -40,7 +40,7 @@ namespace RailRoadSimulator
 		public MainForm()
 		{
 			//set the tick frequency
-			timer.Interval = 1000;
+			timer.Interval = 500;
             fac.GenerateEntity();
             manager = new Manager(fac.coordinates, this);
             background = draw.DrawLayout(fac.coordinates);
@@ -144,7 +144,7 @@ namespace RailRoadSimulator
             background = draw.DrawLayout(fac.coordinates);
             trainLayout = draw.DrawPersonLayout(trainLayout, trainsToDraw);
 
-            Console.WriteLine("DISPLAYED NEW IMAGE");
+            //Console.WriteLine("DISPLAYED NEW IMAGE");
             //dislay new persenLayout and background
             railRoadMap.BackgroundImage = background;
             railRoadMap.Image = trainLayout;
@@ -159,8 +159,8 @@ namespace RailRoadSimulator
         /// <param name="e"></param>
         public void UpdateEvents(object sender, EventArgs e)
         {
-            IEntity last = manager.trains.LastOrDefault();
-            foreach (IEntity person in trainsToDraw.ToList())
+            //IEntity last = manager.trains.LastOrDefault();
+            foreach (IEntity train in trainsToDraw.ToList())
             {
 
                 //if (person.id.Contains("Maid")) //checks if the person is from the maid class
@@ -187,43 +187,60 @@ namespace RailRoadSimulator
                 //    }
                 //}
                 //else
-                if (person.areaType.Contains("Train")) //checks if the person is from the customer class
+                if (train.areaType.Contains("Train")) //checks if the person is from the customer class
                 {
 
-                    if ((person.eventQueue.Count > 0 && person.eventQueue.FirstOrDefault().LastOrDefault().X == person.X && person.eventQueue.FirstOrDefault().LastOrDefault().Y == person.Y))//selects shortest path to the final destination of its event.
+                    if ((train.eventQueue.Count > 0 && train.eventQueue.FirstOrDefault().LastOrDefault().X == train.X && train.eventQueue.FirstOrDefault().LastOrDefault().Y == train.Y))//selects shortest path to the final destination of its event.
                     {
 
-                        person.eventStarted = true;
+                        train.eventStarted = true;
 
 
-                        if (timerTickCount - person.timeBusyEvent >= 250 && manager.evacuation == false) //after around 4.8 seconds goes to next event in the queue (LinkedList).
+                        if (timerTickCount - train.timeBusyEvent >= 250 && manager.evacuation == false) //after around 4.8 seconds goes to next event in the queue (LinkedList).
                         {
 
                             if (manager.evacuation == false)
                             {
 
-                                ILayout start = person.currentRoom;
-
-                                if (person.eventQueue.Count > 0) //Removes first element in the list.
+                                if (train.eventQueue.Count > 0) //Removes first element in the list.
                                 {
-                                    person.eventQueue.RemoveFirst();
-                                    person.route.Clear();
+                                    train.eventQueue.RemoveFirst();
+                                    train.route.Clear();
                                 }
                                 //find new path
-                                //if (person.eventQueue.Count == 0 && person.position != person.room.position)
-                                //{
-                                //    IRoom end = current.room;
-                                //    manager.FindPath(start, end, current);
-                                //}
-                                //if (person.eventQueue.Count > 0)
-                                //{
-                                //    IRoom end = person.eventQueue.First().Last();
-                                //    manager.FindPath(start, end, person);
-                                //}
+                                if (train.eventQueue.Count == 0 && (train.X != train.currentRoom.X && train.Y != train.currentRoom.Y))
+                                {
+                                    //IEntity end = current.room;
+                                    manager.FindPath((Train)train);
+                                }
+                                if (train.eventQueue.Count > 0)
+                                {
+                                    //IRoom end = train.eventQueue.First().Last();
+                                    manager.FindPath((Train)train);
+                                }
                             }
 
-                            person.eventStarted = false;
+                            train.eventStarted = false;
 
+                        }
+                    }
+                    if (train.eventQueue.Count == 0 && (train.endY == train.Y && train.endX == train.X))
+                    {
+                        var current = (Train)train;
+                        foreach (var person in current.personsInTrain.ToList())
+                        {
+                            if (person.endX == current.endX && person.endY == current.endY)
+                            {
+                                current.personsInTrain.Remove(person);
+                            }
+                        }
+                        if (current.personsInTrain.Count != 0)
+                        {
+                            manager.FindPath(current);
+                        }
+                        else
+                        {
+                            manager.trains.Remove(train);
                         }
                     }
                 }

@@ -49,10 +49,10 @@ namespace RailRoadSimulator.Pathfinding
 					//We found the destination and we can be sure (Because the the OrderBy above)
 					//That it's the most low cost option. 
 					var tile = checkTile;
-					Console.WriteLine("Retracing steps backwards...");
+					//Console.WriteLine("Retracing steps backwards...");
 					while (true)
 					{
-						Console.WriteLine($"{tile.X} : {tile.Y}");
+						//Console.WriteLine($"{tile.X} : {tile.Y}");
 						if (map[tile.Y][tile.X] != start.whatIsIt || map[tile.Y][tile.X] != ' ' || map[tile.Y][tile.X] != finish.whatIsIt)
 						{
 							//convert the tiles with their coordinates to the right path
@@ -66,8 +66,8 @@ namespace RailRoadSimulator.Pathfinding
 						{
 							//reverse the final list to ensure it is from the start to the end 
 							finalList.Reverse();
-							Console.WriteLine("Map looks like :");
-							map.ForEach(x => Console.WriteLine(x));
+							//Console.WriteLine("Map looks like :");
+							//map.ForEach(x => Console.WriteLine(x));
 							return finalList;
 						}
 					}
