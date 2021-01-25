@@ -230,12 +230,12 @@ namespace RailRoadSimulator
 				Console.WriteLine("Retire Key is: " + itemKey);
 				Console.WriteLine("Retire Value is: " + itemValue);
 
-				if(itemKey == "A" || itemKey =="B")
+				TempIdentity temp = new TempIdentity();
+				temp.areaType = "Train";
+				if (itemKey == "A" || itemKey =="B")//check if item (retire) key is A or B
 				{
-					TempIdentity temp = new TempIdentity();
-					temp.areaType = "Train";
-					trains.Remove((Train)fac.GetPerson("Train", temp));
-					Console.WriteLine("Train is loesoe");
+					trains.Remove((Train)fac.GetPerson("Train", temp));//Train removed
+					Console.WriteLine("Train is loesoe");//test
 				}
 				
 			}
