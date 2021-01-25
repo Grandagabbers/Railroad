@@ -229,6 +229,14 @@ namespace RailRoadSimulator
 				//value is null
 				Console.WriteLine("Retire Key is: " + itemKey);
 				Console.WriteLine("Retire Value is: " + itemValue);
+
+				if(itemKey == "A" || itemKey =="B")
+				{
+					TempIdentity temp = new TempIdentity();
+					temp.areaType = "Train";
+					trains.Remove((Train)fac.GetPerson("Train", temp));
+					Console.WriteLine("Train is loesoe");
+				}
 				
 			}
 		}
