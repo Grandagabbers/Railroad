@@ -240,6 +240,7 @@ namespace RailRoadSimulator
                         }
                         else
                         {
+                            //Remove train from list
                             manager.trains.Remove(train);
                         }
                     }
