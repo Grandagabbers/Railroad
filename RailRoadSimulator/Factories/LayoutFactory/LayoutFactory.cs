@@ -55,13 +55,20 @@ namespace RailRoadSimulator
                         case 'B':
                         case 'C':
                         case 'D':
+                        case 'E':
                             tile.areaType = "Station";
                             tile.whatIsIt = singleChar;
                             tile.X = x;
                             tile.Y = y;
                             allTiles.Add(tile);
                             break;
-
+                        case 'R':
+                            tile.areaType = "Remise";
+                            tile.whatIsIt = singleChar;
+                            tile.X = x;
+                            tile.Y = y;
+                            allTiles.Add(tile);
+                            break;
                         //use default because we want to check every item in the list
                         default:
                             //if singlechar is not a space then its a track so make that class
@@ -84,7 +91,6 @@ namespace RailRoadSimulator
                 }
                 y++;
             }
-            Console.WriteLine("done");
 			//convert json to templayout
 			//tempRooms = JsonConvert.DeserializeObject<List<TempLayout>>(json);
 		}

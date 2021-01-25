@@ -26,7 +26,7 @@ namespace RailRoadSimulator
         private Draw draw = new Draw();
         private LayoutFactory fac = new LayoutFactory();
 
-        public List<IEntity> trainsToDraw = new List<IEntity>();
+        public List<IEntity> thingsToDraw = new List<IEntity>();
         public List<IEntity> newPeople = new List<IEntity>();
         //private Factory
 
@@ -87,36 +87,29 @@ namespace RailRoadSimulator
             trainLayout.Dispose();//empty the Bitmap
             trainLayout = new Bitmap(background.Width, background.Height); //create new one
 
+            //we use to list because else the list may be updated while this function is still running
             if (newPeople != manager.people.ToList())
             {
                 newPeople.Clear();
 
                 foreach (var people in manager.people.ToList())
                 {
-                    IEntity last = manager.people.Last();
                     newPeople.Add(people);
-                    foreach (var item in manager.trains)
-                    {
-                        if (item.X == people.X && item.Y == people.Y)
-                        {
-                            manager.AddToTrain(people, (Train)item);
-                        }
-                    }
                 }
 
             }
 
             //if there are changes in the simulation
             //update personlayout 
-            if (trainsToDraw != manager.trains.ToList())
+            if (thingsToDraw != manager.trains.ToList())
             {
-                trainsToDraw.Clear();//empty the list 
+                thingsToDraw.Clear();//empty the list 
 
                 //foreach person in manager.people add it to peopleToDraw
                 foreach (var train in manager.trains.ToList())
                 {
                     IEntity last = manager.trains.Last();
-                    trainsToDraw.Add(train);
+                    thingsToDraw.Add(train);
 
                     //if person has a path to walk. go walk
                     if (train.route != null && train.route.Count > 0)
@@ -139,10 +132,30 @@ namespace RailRoadSimulator
                 }
 
             }
+            foreach (IEntity people in manager.people.ToList())
+            {
+                if (people.areaType.Contains("Maid")) //checks if the person is from the maid class
+                {
+                    Maid currentMaid = (Maid)people;
+
+                    currentMaid.eventStarted = true;
+                    if (timerTickCount - currentMaid.timeBusyEvent >= 250 && manager.evacuation == false) //after around 4.8 seconds the maid is done with cleaning room she is in.
+                    {
+                        currentMaid.eventStarted = false;
+                        //manager.FinishCleaning(currentMaid, currentMaid.room);//finish cleaning the room
+                    }
+                    //add to the to draw list
+                    thingsToDraw.Add(currentMaid);
+                }
+                if (people.areaType.Contains("Person")) {
+                    Person current = (Person)people;
+                    thingsToDraw.Add(current);
+                }
+            }
             //draw the new personLayout and background
             background.Dispose();
             background = draw.DrawLayout(fac.coordinates);
-            trainLayout = draw.DrawPersonLayout(trainLayout, trainsToDraw);
+            trainLayout = draw.DrawPersonLayout(trainLayout, thingsToDraw);
 
             //Console.WriteLine("DISPLAYED NEW IMAGE");
             //dislay new persenLayout and background
@@ -159,34 +172,8 @@ namespace RailRoadSimulator
         /// <param name="e"></param>
         public void UpdateEvents(object sender, EventArgs e)
         {
-            //IEntity last = manager.trains.LastOrDefault();
-            foreach (IEntity train in trainsToDraw.ToList())
+            foreach (IEntity train in thingsToDraw.ToList())
             {
-
-                //if (person.id.Contains("Maid")) //checks if the person is from the maid class
-                //{
-                //    Maid currentMaid = (Maid)person;
-
-                //    if (currentMaid.eventQueue.Count > 0 && currentMaid.eventQueue.FirstOrDefault().LastOrDefault().position == currentMaid.position) //checks if the maid is in the room she needs to clean.
-                //    {
-                //        currentMaid.eventStarted = true;
-                //        if (timerTickCount - currentMaid.timeBusyEvent >= 250 && manager.evacuation == false) //after around 4.8 seconds the maid is done with cleaning room she is in.
-                //        {
-                //            IRoom start = currentMaid.eventQueue.FirstOrDefault().Last();
-                //            if (currentMaid.eventQueue.Count > 0) //removes the room the maid was cleaning out of her toclean list.
-                //            {
-                //                currentMaid.eventQueue.RemoveFirst();
-                //                currentMaid.route.Clear();
-                //            }
-
-                //            currentMaid.eventStarted = false;
-                //            manager.FinishCleaning(currentMaid, currentMaid.room);//finish cleaning the room
-
-                //        }
-
-                //    }
-                //}
-                //else
                 if (train.areaType.Contains("Train")) //checks if the person is from the customer class
                 {
 
@@ -194,8 +181,6 @@ namespace RailRoadSimulator
                     {
 
                         train.eventStarted = true;
-
-
                         if (timerTickCount - train.timeBusyEvent >= 250 && manager.evacuation == false) //after around 4.8 seconds goes to next event in the queue (LinkedList).
                         {
 
@@ -227,21 +212,33 @@ namespace RailRoadSimulator
                     if (train.eventQueue.Count == 0 && (train.endY == train.Y && train.endX == train.X))
                     {
                         var current = (Train)train;
-                        foreach (var person in current.personsInTrain.ToList())
-                        {
-                            if (person.endX == current.endX && person.endY == current.endY)
-                            {
-                                current.personsInTrain.Remove(person);
-                            }
+                        if (current.personsInTrain.Count > 0) {
+                            //checkout persons because they are at their station
+                            manager.CheckOutPeople(current);
                         }
+
+                        //if the capacity of the train is not filled after checkout
+                        if (current.capacity >= current.personsInTrain.Count) {
+                            //check if there are persons add that station if so let them go in
+                            manager.CheckIfPeopleAtStation(current);
+                        }
+
+
+                        //foreach (var person in current.personsInTrain.ToList())
+                        //{
+                        //    if (person.endX == current.endX && person.endY == current.endY)
+                        //    {
+                        //        current.personsInTrain.Remove(person);
+                        //    }
+                        //}
                         if (current.personsInTrain.Count != 0)
                         {
-                            manager.FindPath(current);
+                            //manager.FindPath(current);
                         }
                         else
                         {
                             //Remove train from list
-                            manager.trains.Remove(train);
+                            //manager.trains.Remove(train);
                         }
                     }
                 }

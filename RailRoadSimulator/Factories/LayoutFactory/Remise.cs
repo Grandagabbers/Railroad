@@ -7,18 +7,18 @@ using System.Threading.Tasks;
 
 namespace RailRoadSimulator
 {
-	public class Person : IEntity
+	public class Remise : ILayout
 	{
-		public Person(TempIdentity temp)
+		public List<Train> trainsInStorage { get; set; }
+		public Remise(Tile temp)
 		{
+			trainsInStorage = new List<Train>();
 			areaType = temp.areaType;
 			X = temp.X;
 			Y = temp.Y;
-			endX = temp.endX;
-			endY = temp.endY;
-			endStationName = temp.endStationName;
-			model = Image.FromFile(@"..\..\Assets\Guest.png");
+			model = Image.FromFile(@"..\..\Assets\station.png");
 			model.RotateFlip(RotateFlipType.Rotate180FlipX);//rotate image so its correctly displayed
+
 		}
 	}
 }

@@ -16,11 +16,12 @@ namespace RailRoadSimulator
         /// <param name="tempPerson">the tempperson which becomes a maid</param>
         public Maid(TempIdentity temp)
         {
-            this.id = temp.id;
+            areaType = temp.areaType;
+            //this.id = temp.id;
             //this.busy = temp.busy;
             X = temp.X;
             Y = temp.Y;
-            model = Image.FromFile(@"..\..\Assets\Maid.png");//the model
+            model = Image.FromFile(@"..\..\Assets\location.png");//the model
             model.RotateFlip(RotateFlipType.Rotate180FlipX);//rotate so its displayed correctly
         }
     }

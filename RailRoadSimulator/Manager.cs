@@ -52,10 +52,11 @@ namespace RailRoadSimulator
 					amount.Add(test, 1);
 				}
 			}
-			var keyOfMaxValue = amount.Aggregate((x, y) => x.Value > y.Value ? x : y).Key; // "a"
-			current.endX = keyOfMaxValue.X;
-			current.endY = keyOfMaxValue.Y;
-
+			if (amount.Count > 0) {
+				var keyOfMaxValue = amount.Aggregate((x, y) => x.Value > y.Value ? x : y).Key; 
+				current.endX = keyOfMaxValue.X;
+				current.endY = keyOfMaxValue.Y;
+			}
 			//make the endTile of the train
 			Tile endTile = new Tile();
 			endTile.X = current.endX;
@@ -69,18 +70,27 @@ namespace RailRoadSimulator
 
 			}
 
-
-		public void AddToTrain(IEntity person, Train train) {
-
-			if (train.personsInTrain.Count < train.capacity)
-			{
-				train.personsInTrain.Add((Person)person);
-				//remove person because it is in train
-				people.Remove(person);
+		public void CheckIfPeopleAtStation(Train train)
+		{
+			foreach (var person in people.ToList()) {
+				if (person.areaType.Contains("Person") && train.X == person.X && train.Y == person.Y && train.capacity >= train.personsInTrain.Count) {
+					train.personsInTrain.Add((Person)person);
+					//remove people because they are now in train
+					people.Remove(person);
+				}
 			}
-			else
-			{
+			if (train.personsInTrain.Count > 0) {
 				FindPath(train);
+			}
+		}
+
+		public void CheckOutPeople(Train train)
+		{
+			foreach (var person in train.personsInTrain.ToList()) {
+				//if position is correct remove people from train because they are at their location
+				if (person.endX == train.X && person.endY == train.Y) {
+					train.personsInTrain.Remove(person);
+				}
 			}
 		}
 
@@ -105,9 +115,18 @@ namespace RailRoadSimulator
 				temp.areaType = "Train";
 				foreach (var item in coordinates) {
 					if (item != null) {
-						if (item.areaType == "Station" && item.whatIsIt == Char.Parse(itemValue)) {
+						if (item.areaType == "Remise") {
 							temp.X = item.X;
 							temp.Y = item.Y;
+						}
+						if (temp.endX != item.X || temp.endY != item.Y)
+						{
+							if (item.areaType == "Station" && item.whatIsIt == Char.Parse(itemValue))
+							{
+								temp.endX = item.X;
+								temp.endY = item.Y;
+								temp.endStationName = itemValue.Last();
+							}
 						}
 					}
 				}
@@ -128,6 +147,8 @@ namespace RailRoadSimulator
 				temp.amountOfWagons = number;
 				//Spawn a train
 				trains.Add((Train)fac.GetPerson("Train", temp));
+
+				FindPath((Train)trains.Last());
 				//Key is amount of wagons
 				//Value is startlocation of train
 				Console.WriteLine("Amount of wagons Key is: " + itemKey);
@@ -162,18 +183,16 @@ namespace RailRoadSimulator
 
 					}
 				}
-
-				people.Add((Person)fac.GetPerson("Person", temp));
-
-				foreach (var item in trains)
+				if (temp.X != temp.endX && temp.Y != temp.endY)
 				{
-					if (item.X == people.First().X && item.Y == people.First().Y)
-					{
-						AddToTrain(people.First(), (Train)item);
-					}
+					people.Add((Person)fac.GetPerson("Person", temp));
+				}
+				else
+				{
+					Console.WriteLine("I am already at my station");
 				}
 
-				//FindPath(people.Last());
+
 				//set startcoordinates
 				//check if train is at station, if so then step in train
 				//start timer, if person waits too long for train -> delete person: he dies
@@ -191,6 +210,26 @@ namespace RailRoadSimulator
 				//clean everything, so create maids
 				Console.WriteLine("Cleaning emergency Key is: " + itemKey);
 				Console.WriteLine("Cleaning emergency Value is: " + itemValue);
+
+				TempIdentity temp = new TempIdentity();
+				temp.areaType = "Maid";
+
+				foreach (var item in coordinates)
+				{
+					if (item != null)
+					{
+						if (temp.X != item.X || temp.Y != item.Y)
+						{
+							if (item.areaType == itemKey && item.whatIsIt == itemValue.Last())
+							{
+								temp.X = item.X;
+								temp.Y = item.Y;
+							}
+						}
+					}
+				}
+				
+				people.Add((Maid)fac.GetPerson("Maid", temp));
 
 
 			}
@@ -232,11 +271,11 @@ namespace RailRoadSimulator
 
 				TempIdentity temp = new TempIdentity();
 				temp.areaType = "Train";
-				if (itemKey == "A" || itemKey =="B")//check if item (retire) key is A or B
-				{
-					trains.Remove((Train)fac.GetPerson("Train", temp));//Train removed
-					Console.WriteLine("Train is loesoe");//test
-				}
+				//if (itemKey == "A" || itemKey =="B")//check if item (retire) key is A or B
+				//{
+				//	trains.Remove((Train)fac.GetPerson("Train", temp));//Train removed
+				//	Console.WriteLine("Train is loesoe");//test
+				//}
 				
 			}
 		}

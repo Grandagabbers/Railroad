@@ -63,6 +63,7 @@
     <Compile Include="Factories\EntityFactory\Train.cs" />
     <Compile Include="Factories\LayoutFactory\ILayout.cs" />
     <Compile Include="Factories\LayoutFactory\LayoutFactory.cs" />
+    <Compile Include="Factories\LayoutFactory\Remise.cs" />
     <Compile Include="Factories\LayoutFactory\Station.cs" />
     <Compile Include="Factories\LayoutFactory\TempLayout.cs" />
     <Compile Include="Factories\LayoutFactory\Track.cs" />
@@ -110,7 +111,6 @@
     </Compile>
     <None Include="simple-0.trc" />
     <None Include="simple-8.trc" />
-    <None Include="trackVersion1.json" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
@@ -118,11 +118,11 @@
   <ItemGroup />
   <ItemGroup>
     <Content Include="Assets\location.png" />
+    <Content Include="Assets\maid.png" />
     <Content Include="Assets\railway-station.png" />
     <Content Include="Assets\station.png" />
+    <Content Include="Assets\Guest.png" />
     <Content Include="Assets\track.png" />
-    <Content Include="Assets\tracks - kopie.png" />
-    <Content Include="Assets\tracks.png" />
     <Content Include="Assets\train.png" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

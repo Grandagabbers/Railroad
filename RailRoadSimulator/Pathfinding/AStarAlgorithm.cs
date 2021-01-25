@@ -78,7 +78,7 @@ namespace RailRoadSimulator.Pathfinding
 
 				var walkableTiles = GetWalkableTiles(map, checkTile, finish);
 
-				foreach (var walkableTile in walkableTiles)
+				foreach (var walkableTile in walkableTiles.ToList())
 				{
 					//We have already visited this tile so we don't need to do so again!
 					if (visitedTiles.Any(x => x.X == walkableTile.X && x.Y == walkableTile.Y))
