@@ -40,7 +40,7 @@ namespace RailRoadSimulator
 		public MainForm()
 		{
 			//set the tick frequency
-			timer.Interval = 500;
+			timer.Interval = 250;
             fac.GenerateEntity();
             manager = new Manager(fac.coordinates, this);
             background = draw.DrawLayout(fac.coordinates);
@@ -162,7 +162,6 @@ namespace RailRoadSimulator
             railRoadMap.BackgroundImage = background;
             railRoadMap.Image = trainLayout;
 
-
         }
 
         /// <summary>
@@ -192,17 +191,17 @@ namespace RailRoadSimulator
                                     train.eventQueue.RemoveFirst();
                                     train.route.Clear();
                                 }
-                                //find new path
-                                if (train.eventQueue.Count == 0 && (train.X != train.currentRoom.X && train.Y != train.currentRoom.Y))
-                                {
-                                    //IEntity end = current.room;
-                                    manager.FindPath((Train)train);
-                                }
-                                if (train.eventQueue.Count > 0)
-                                {
-                                    //IRoom end = train.eventQueue.First().Last();
-                                    manager.FindPath((Train)train);
-                                }
+                                ////find new path
+                                //if (train.eventQueue.Count == 0 && (train.X != train.currentRoom.X && train.Y != train.currentRoom.Y))
+                                //{
+                                //    //IEntity end = current.room;
+                                //    manager.FindPath((Train)train);
+                                //}
+                                //if (train.eventQueue.Count > 0)
+                                //{
+                                //    //IRoom end = train.eventQueue.First().Last();
+                                //    manager.FindPath((Train)train);
+                                //}
                             }
 
                             train.eventStarted = false;

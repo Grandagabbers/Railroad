@@ -84,6 +84,7 @@ namespace RailRoadSimulator
 			}
 			if (train.personsInTrain.Count > 0)
 			{
+				train.routeCounter = 0;
 				FindPath(train);
 			}
 		}
@@ -278,9 +279,24 @@ namespace RailRoadSimulator
 				//value is null
 				Console.WriteLine("Retire Key is: " + itemKey);
 				Console.WriteLine("Retire Value is: " + itemValue);
-
 				TempIdentity temp = new TempIdentity();
-				temp.areaType = "Station";
+
+				foreach (var item in coordinates)
+				{
+					if (item != null)
+					{
+						if (item.areaType == "Remise")
+						{
+							temp.endX = item.X;
+							temp.endY = item.Y;
+							break;
+						}
+					}
+				}
+
+				//Find the best path back to remise
+				//FindPath(train);
+
 				//itemKey.Last();
 				//foreach (var item in coordinates)
 				//{

@@ -25,7 +25,7 @@ namespace RailRoadSimulator
         private int imageWidth = 60; //width of the person in pixels
         private int imageHeight = 75;//height of the person in pixels
         public List<Tile> route; //current route person is walking
-        private int routeCounter = 0; //counter which keeps track where person is on its current route
+        public int routeCounter = 0; //counter which keeps track where person is on its current route
 
         public IEntity()
 		{
