@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
+using System.Diagnostics;
 using System.Drawing;
 using System.Linq;
 using System.Text;
@@ -14,8 +15,9 @@ namespace RailRoadSimulator
 	public partial class MainForm : Form
 	{
 		public Timer timer { get; } = new Timer();
-
-		private int timerTickCount { get; set; }
+        private Timer timerForMaids { get; } = new Timer();
+        private Timer slowTimer { get; } = new Timer();
+        private int timerTickCount { get; set; }
 
 		//background where to draw the layout on
 		private Bitmap background;
@@ -41,6 +43,7 @@ namespace RailRoadSimulator
 		{
 			//set the tick frequency
 			timer.Interval = 250;
+            timerForMaids.Interval = 250;
             fac.GenerateEntity();
             manager = new Manager(fac.coordinates, this);
             background = draw.DrawLayout(fac.coordinates);
@@ -55,7 +58,7 @@ namespace RailRoadSimulator
             //pauseButton.Size = new Size(250, 100);
             //pauseButton.Text = "Pauze";
             //pauseButton.Click += new EventHandler(PauseButton_Click);
-            //speedButton.Location = new Point(background.Width + distanceButtons, pauseButton.Height + distanceButtons);
+            //speedButton.Location = new Point( 10,  10);
             //speedButton.Size = pauseButton.Size;
             //speedButton.Text = "Versnellen";
             //speedButton.Click += new EventHandler(SpeedButton_Click);
@@ -71,9 +74,12 @@ namespace RailRoadSimulator
             //Start the hotel events 
             RailroadEventManager.Start();
 			timer.Start();
+            timerForMaids.Start();
 
             //call the update function after each timer tick.
             timer.Tick += new EventHandler(UpdateImage);
+
+
         }
 
         /// <summary>
@@ -81,11 +87,24 @@ namespace RailRoadSimulator
         /// </summary>
         /// <param name="sender">interval</param>
         /// <param name="e"></param>
-        private void UpdateImage(object sender, EventArgs e)
+       private void UpdateImage(object sender, EventArgs e)
         {
-            timer.Tick += (UpdateEvents);
+            timerForMaids.Tick += (UpdateEvents);
             trainLayout.Dispose();//empty the Bitmap
             trainLayout = new Bitmap(background.Width, background.Height); //create new one
+
+            if (manager.Leaves.Value == true) {
+                manager.Leaves = new KeyValuePair<int, bool>(manager.Leaves.Key, false);
+                //multiply by 1000 key is given in seconds
+                slowTimer.Interval = manager.Leaves.Key * 1000;
+                RailroadEventManager.RRTE_Factor = RailroadEventManager.RRTE_Factor / 2f;
+                timer.Interval = timer.Interval * 2;
+                slowTimer.Start();
+            }
+
+            if (slowTimer != null && slowTimer.Enabled == true) {
+                slowTimer.Tick += new EventHandler(SlowDown);
+            }
 
             //we use to list because else the list may be updated while this function is still running
             if (newPeople != manager.people.ToList())
@@ -387,11 +406,14 @@ namespace RailRoadSimulator
             }
         }
 
-        /// <summary>
-        /// Speed up or slow down the simulation
-        /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="e"></param>
+
+        public void SpeedUp()
+        {
+            Console.WriteLine("Speed up");
+                RailroadEventManager.RRTE_Factor = RailroadEventManager.RRTE_Factor / 2f;
+                timer.Interval = timer.Interval * 2;
+        }
+
         private void SpeedButton_Click(object sender, EventArgs e)
         {
             if (buttonCounter % 2 == 0 || buttonCounter == 0)//speed up
@@ -420,6 +442,15 @@ namespace RailRoadSimulator
             RailroadEventManager.Stop();
             this.Hide();
             //settings.Show();
+        }
+
+        public void SlowDown(object sender, EventArgs e)
+        {
+            slowTimer.Stop();
+            slowTimer.Enabled = false;
+            //RailroadEventManager.RRTE_Factor = RailroadEventManager.RRTE_Factor * 2f;
+            //timer.Interval = timer.Interval / 2;
+            Console.WriteLine("sneller");
         }
     }
 }

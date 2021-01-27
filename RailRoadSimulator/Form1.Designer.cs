@@ -46,7 +46,7 @@
 			// 
 			this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
 			this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-			this.ClientSize = new System.Drawing.Size(1710, 736);
+			this.ClientSize = new System.Drawing.Size(1811, 735);
 			this.Controls.Add(this.railRoadMap);
 			this.Name = "MainForm";
 			this.Text = "Form1";

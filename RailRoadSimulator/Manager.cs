@@ -24,6 +24,7 @@ namespace RailRoadSimulator
 		EntityFactory fac = new EntityFactory();
 		public ILayout[,] coordinates { get; set; }
 		PathFinding path = new PathFinding();
+		public KeyValuePair<int, bool> Leaves { get; set; }
 		public Manager(ILayout[,] coordinates, MainForm main)
 		{
 			this.main = main;
@@ -33,7 +34,7 @@ namespace RailRoadSimulator
 
 			RailroadEventManager.Register(this);
 			//To speed up for testing
-			RailroadEventManager.RRTE_Factor = RailroadEventManager.RRTE_Factor * 4f;
+			//RailroadEventManager.RRTE_Factor = RailroadEventManager.RRTE_Factor * 4f;
 		}
 
 		public void FindPath(Train current)
@@ -246,27 +247,30 @@ namespace RailRoadSimulator
 			}
 			else if (evt.EventType == RailroadEventType.LEAVES_ON_TRACK)
 			{
-				Stopwatch watch = new Stopwatch();
-				watch.Start();
-
-				//leaves on track so slow game by half
-				RailroadEventManager.RRTE_Factor = RailroadEventManager.RRTE_Factor / 2f;
-				//main.timer.Interval = main.timer.Interval / 2;
-
+			
 				//Slow down RRTE factor by half
 				//Key is duration
 				//Value is how many seconds and then normal again
 				Console.WriteLine("Leaves on track Key is: " + itemKey);
 				Console.WriteLine("Leaves on track Value is: " + itemValue);
-				//while (watch.ElapsedMilliseconds != 10000)
-				//{
 
-				//}
+				int number = 0;
+				string extract = "";
+				//this is a string now, maybe convert the string to int
+				//then we have to search for the number in the string
+				for (int i = 0; i < itemValue.Length; i++)
+				{
+					if (Char.IsDigit(itemValue[i]))
+						extract += itemValue[i];
+				}
 
-				Console.WriteLine("10 Seconds have passed, speed up again");
-				RailroadEventManager.RRTE_Factor = RailroadEventManager.RRTE_Factor * 2f;
-				//main.timer.Interval = main.timer.Interval * 2;
-				watch.Stop();
+				if (extract.Length > 0)
+				{
+					number = int.Parse(extract);
+				}
+
+				Leaves = new KeyValuePair<int, bool>(number, true);
+				//this.main.SlowDown();
 
 			}
 			else if (evt.EventType == RailroadEventType.RETIRE_TRAIN)
