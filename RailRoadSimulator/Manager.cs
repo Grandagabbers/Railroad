@@ -34,7 +34,7 @@ namespace RailRoadSimulator
 
 			RailroadEventManager.Register(this);
 			//To speed up for testing
-			//RailroadEventManager.RRTE_Factor = RailroadEventManager.RRTE_Factor * 4f;
+			RailroadEventManager.RRTE_Factor = RailroadEventManager.RRTE_Factor * 4f;
 		}
 
 		public void FindPath(Train current)

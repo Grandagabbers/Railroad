@@ -18,6 +18,8 @@ namespace RailRoadSimulator
         private Timer timerForMaids { get; } = new Timer();
         private Timer slowTimer { get; } = new Timer();
         private int timerTickCount { get; set; }
+        private bool slowBool { get; set; } = false;
+        private int amount { get; set; } = 0;
 
 		//background where to draw the layout on
 		private Bitmap background;
@@ -44,6 +46,7 @@ namespace RailRoadSimulator
 			//set the tick frequency
 			timer.Interval = 250;
             timerForMaids.Interval = 250;
+            slowTimer.Enabled = false;
             fac.GenerateEntity();
             manager = new Manager(fac.coordinates, this);
             background = draw.DrawLayout(fac.coordinates);
@@ -100,10 +103,19 @@ namespace RailRoadSimulator
                 RailroadEventManager.RRTE_Factor = RailroadEventManager.RRTE_Factor / 2f;
                 timer.Interval = timer.Interval * 2;
                 slowTimer.Start();
+                //set amount and enabled back to 0 to make sure this event can happen again
+                slowTimer.Enabled = true;
+                amount = 0;
             }
 
-            if (slowTimer != null && slowTimer.Enabled == true) {
-                slowTimer.Tick += new EventHandler(SlowDown);
+            //check amount to ensure it only happens one time
+            //check enabled to ensure it doesnt go at the start of the application, then set it to false again so the event can be fired again
+            if (slowTimer != null && amount == 0 && slowTimer.Enabled == true) {
+
+                slowTimer.Tick += new EventHandler(SpeedUp);
+                slowTimer.Enabled = false;
+                amount++;
+
             }
 
             //we use to list because else the list may be updated while this function is still running
@@ -406,30 +418,15 @@ namespace RailRoadSimulator
             }
         }
 
-
-        public void SpeedUp()
-        {
-            Console.WriteLine("Speed up");
-                RailroadEventManager.RRTE_Factor = RailroadEventManager.RRTE_Factor / 2f;
-                timer.Interval = timer.Interval * 2;
-        }
-
         private void SpeedButton_Click(object sender, EventArgs e)
         {
-            if (buttonCounter % 2 == 0 || buttonCounter == 0)//speed up
-            {
-                RailroadEventManager.RRTE_Factor = RailroadEventManager.RRTE_Factor * 2f;
-                timer.Interval = timer.Interval / 2;
-                speedButton.Text = "Vertragen";
-                buttonCounter++;
-            }
-            else//slow down
-            {
+
+
                 RailroadEventManager.RRTE_Factor = RailroadEventManager.RRTE_Factor / 2f;
                 timer.Interval = timer.Interval * 2;
                 speedButton.Text = "Versnellen";
                 buttonCounter++;
-            }
+            
         }
 
         /// <summary>
@@ -444,12 +441,15 @@ namespace RailRoadSimulator
             //settings.Show();
         }
 
-        public void SlowDown(object sender, EventArgs e)
+        /// <summary>
+        /// Speeds up the event by 2 times the speed
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        public void SpeedUp(object sender, EventArgs e)
         {
-            slowTimer.Stop();
-            slowTimer.Enabled = false;
-            //RailroadEventManager.RRTE_Factor = RailroadEventManager.RRTE_Factor * 2f;
-            //timer.Interval = timer.Interval / 2;
+            RailroadEventManager.RRTE_Factor = RailroadEventManager.RRTE_Factor * 2f;
+            timer.Interval = timer.Interval / 2;
             Console.WriteLine("sneller");
         }
     }
