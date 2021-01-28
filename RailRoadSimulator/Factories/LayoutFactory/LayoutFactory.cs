@@ -16,10 +16,8 @@ namespace RailRoadSimulator
 		//Temporary list of layout
 		public List<TempLayout> tempRooms = new List<TempLayout>();
 		public List<ILayout> layout = new List<ILayout>();
-        public List<String> finalLay = new List<String>();
+        public List<string> finalLay = new List<string>();
         public List<Tile> allTiles = new List<Tile>();
-        PathFinding path = new PathFinding();
-        //public Elevator elevator;
         public ILayout[,] coordinates { get; set; }
         public void GenerateEntity()
 		{
@@ -76,7 +74,7 @@ namespace RailRoadSimulator
                             {
                                 tile.whatIsIt = singleChar;
                                 tile.areaType = "Track";
-                                if (tile.rideableTracks.Contains(singleChar))
+                                if (tile.dubbelTrack.Contains(singleChar))
                                 {
                                     tile.isDubbelTrack = true;
                                 }

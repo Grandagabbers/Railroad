@@ -26,7 +26,6 @@ namespace RailRoadSimulator
         private int imageHeight = 75;//height of the person in pixels
         public List<Tile> route; //current route person is walking
         public int routeCounter = 0; //counter which keeps track where person is on its current route
-
         public IEntity()
 		{
             route = new List<Tile>();
@@ -35,15 +34,16 @@ namespace RailRoadSimulator
         /// <summary>
         /// Makes the animation possible by moving the person to next coordinate.
         /// </summary>
-        public void WalkTo()
+        public void WalkTo(ILayout current)
         {
             if (routeCounter <= route.Count - 1)
             {
 
-                this.X = this.route[routeCounter].X; //set the current postition to the current position of the route the person is walking
+                this.X = this.route[routeCounter].X; //set the current postition to the current position of the route the train is walking
                 this.Y = this.route[routeCounter].Y;
                 routeCounter++;
-
+                //set isOccupied back to false since this track is no longer occupied
+                current.isOccupied = false;
             }
 
         }

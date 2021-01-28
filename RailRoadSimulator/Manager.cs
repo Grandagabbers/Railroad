@@ -18,23 +18,25 @@ namespace RailRoadSimulator
 		string itemKey { get; set; }
 		string itemValue { get; set; }
 		public bool evacuation { get; set; } = false;
+
 		public List<IEntity> people = new List<IEntity>();
 		public List<IEntity> trains = new List<IEntity>();
+
 		List<string> layout = new List<string>();
 		EntityFactory fac = new EntityFactory();
 		public ILayout[,] coordinates { get; set; }
 		PathFinding path = new PathFinding();
 		public KeyValuePair<int, bool> Leaves { get; set; }
+		public KeyValuePair<char, bool> ReturnToRemisePair { get; set; }
 		public Manager(ILayout[,] coordinates, MainForm main)
 		{
 			this.main = main;
 			this.coordinates = coordinates;
 			layout = System.IO.File.ReadAllLines(@"..\..\final-assignment.trc").ToList<String>();
-			//CreateGraph(coordinates);
 
 			RailroadEventManager.Register(this);
 			//To speed up for testing
-			RailroadEventManager.RRTE_Factor = RailroadEventManager.RRTE_Factor * 4f;
+			//RailroadEventManager.RRTE_Factor = RailroadEventManager.RRTE_Factor * 4f;
 		}
 
 		public void FindPath(Train current)
@@ -268,15 +270,11 @@ namespace RailRoadSimulator
 				{
 					number = int.Parse(extract);
 				}
-
 				Leaves = new KeyValuePair<int, bool>(number, true);
-				//this.main.SlowDown();
 
 			}
 			else if (evt.EventType == RailroadEventType.RETIRE_TRAIN)
 			{
-				char startLocation = itemKey.Last<char>();
-				//start the train
 				//start pathfinding at station itemKey
 
 				//Key is where to go from?
@@ -297,6 +295,9 @@ namespace RailRoadSimulator
 						}
 					}
 				}
+				//set keyvaluepair use this to determine which train has to come back to remise
+				ReturnToRemisePair = new KeyValuePair<char, bool>(Char.Parse(itemKey), true);
+				//ReturnToRemise(train);
 
 				//Find the best path back to remise
 				//FindPath(train);
@@ -318,7 +319,24 @@ namespace RailRoadSimulator
 				//}
 			}
 		}
+		public void ReturnToRemise(Train train)
+		{
+			foreach (var item in coordinates)
+			{
+				if (item != null)
+				{
+					if (item.areaType == "Remise")
+					{
+						train.endX = item.X;
+						train.endY = item.Y;
+						break;
+					}
+				}
+			}
+			FindPath(train);
+		}
 	}
+
 		/// <summary>
 		/// Look for every room what the neighbours are 
 		/// and store them

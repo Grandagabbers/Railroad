@@ -20,6 +20,7 @@ namespace RailRoadSimulator
 		public int Distance { get; set; }
 		public int CostDistance => Cost + Distance;
 		public char whatIsIt { get; set; }
+		public bool isOccupied { get; set; } = false;
 		public ILayout()
 		{
 

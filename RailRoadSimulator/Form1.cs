@@ -109,11 +109,10 @@ namespace RailRoadSimulator
             }
 
             //check amount to ensure it only happens one time
-            //check enabled to ensure it doesnt go at the start of the application, then set it to false again so the event can be fired again
+            //check enabled to ensure it doesnt go at the start of the application
             if (slowTimer != null && amount == 0 && slowTimer.Enabled == true) {
 
                 slowTimer.Tick += new EventHandler(SpeedUp);
-                slowTimer.Enabled = false;
                 amount++;
 
             }
@@ -126,6 +125,16 @@ namespace RailRoadSimulator
                 foreach (var people in manager.people.ToList())
                 {
                     newPeople.Add(people);
+                    if (people.areaType.Contains("Person")) {
+                        var pers = (Person)people;
+                        bool hasDied = pers.isWaiting();
+                        if (hasDied) {
+                            manager.people.Remove(pers);
+                            newPeople.Remove(pers);
+
+                        }
+                    }
+
                 }
 
             }
@@ -139,7 +148,7 @@ namespace RailRoadSimulator
                 //foreach person in manager.people add it to peopleToDraw
                 foreach (var train in manager.trains.ToList())
                 {
-                    IEntity last = manager.trains.Last();
+                    //IEntity last = manager.trains.Last();
                     thingsToDraw.Add(train);
 
                     //if person has a path to walk. go walk
@@ -149,13 +158,15 @@ namespace RailRoadSimulator
 
                         if (wait == false)//if wait is false. The person is not in a elevator so it can continue moving. 
                         {
-                            train.WalkTo();
                             ILayout check = fac.coordinates[train.X, train.Y];
                             if (check != null && fac.coordinates[check.X, check.Y] == check)
                             {
                                 train.currentRoom = check;
+                                if (train.currentRoom.areaType.Contains("Station")) {
+                                    //manager.CheckIfPeopleAtStation((Train)train);
+                                }
                             }
-
+                            train.WalkTo(train.currentRoom);
                         }
                         wait = false;
                     }
@@ -242,6 +253,7 @@ namespace RailRoadSimulator
                     if (train.eventQueue.Count == 0 && (train.endY == train.Y && train.endX == train.X))
                     {
                         var current = (Train)train;
+
                         if (current.personsInTrain.Count > 0) {
                             //checkout persons because they are at their station
                             manager.CheckOutPeople(current);
@@ -251,6 +263,12 @@ namespace RailRoadSimulator
                         if (current.capacity >= current.personsInTrain.Count) {
                             //check if there are persons add that station if so let them go in
                             manager.CheckIfPeopleAtStation(current);
+                            if (current.personsInTrain.Count == 0 && manager.ReturnToRemisePair.Value == true) {
+                                if (current.currentRoom.areaType.Contains("Remise")) {
+                                    manager.trains.Remove(current);
+                                }
+                                manager.ReturnToRemise(current);
+                            }
                         }
 
 
@@ -261,15 +279,6 @@ namespace RailRoadSimulator
                         //        current.personsInTrain.Remove(person);
                         //    }
                         //}
-                        if (current.personsInTrain.Count != 0)
-                        {
-                            //manager.FindPath(current);
-                        }
-                        else
-                        {
-                            //Remove train from list
-                            //manager.trains.Remove(train);
-                        }
                     }
                 }
                 ///check if a evac is going on, if so set person.evac to true 
@@ -448,6 +457,8 @@ namespace RailRoadSimulator
         /// <param name="e"></param>
         public void SpeedUp(object sender, EventArgs e)
         {
+            //Set slowtimer.enabled it to false again so the event can be fired again
+            slowTimer.Enabled = false;
             RailroadEventManager.RRTE_Factor = RailroadEventManager.RRTE_Factor * 2f;
             timer.Interval = timer.Interval / 2;
             Console.WriteLine("sneller");
