@@ -21,7 +21,7 @@ namespace RailRoadSimulator
             //this.busy = temp.busy;
             X = temp.X;
             Y = temp.Y;
-            model = Image.FromFile(@"..\..\Assets\location.png");//the model
+            model = Image.FromFile(@"..\..\Assets\maid.png");//the model
             model.RotateFlip(RotateFlipType.Rotate180FlipX);//rotate so its displayed correctly
         }
     }
