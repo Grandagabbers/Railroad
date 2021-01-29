@@ -78,6 +78,7 @@ namespace RailRoadSimulator
 			{
 				if (person.areaType.Contains("Person") && train.X == person.X && train.Y == person.Y && train.capacity >= train.personsInTrain.Count)
 				{
+					Console.WriteLine("Person checked in");
 					train.personsInTrain.Add((Person)person);
 					//remove people because they are now in train
 					people.Remove(person);
@@ -88,6 +89,10 @@ namespace RailRoadSimulator
 				train.routeCounter = 0;
 				FindPath(train);
 			}
+			else
+			{
+				Console.WriteLine("No one to check in, continue to location");
+			}
 		}
 			public void CheckOutPeople(Train train)
 		{
@@ -97,6 +102,7 @@ namespace RailRoadSimulator
 				if (person.endX == train.X && person.endY == train.Y)
 				{
 					train.personsInTrain.Remove(person);
+					Console.WriteLine("Person checked out");
 				}
 			}
 		}
@@ -110,7 +116,7 @@ namespace RailRoadSimulator
 				{
 					if (train.capacity < 1)
 					{
-						people.Add((Maid)fac.GetPerson("Person", temp));
+						//people.Add((Maid)fac.GetPerson("Person", temp));
 					}
 				}
 			}
@@ -178,8 +184,8 @@ namespace RailRoadSimulator
 				FindPath((Train)trains.Last());
 				//Key is amount of wagons
 				//Value is startlocation of train
-				Console.WriteLine("Amount of wagons Key is: " + itemKey);
-				Console.WriteLine("Amoubt of wagons Value is: " + itemValue);
+				//Console.WriteLine("Amount of wagons Key is: " + itemKey);
+				//Console.WriteLine("Amoubt of wagons Value is: " + itemValue);
 			}
 			else if (evt.EventType == RailroadEventType.SPAWN_PASSENGER)
 			{
@@ -187,37 +193,38 @@ namespace RailRoadSimulator
 				TempIdentity temp = new TempIdentity();
 
 				temp.areaType = "Person";
-				foreach (var item in coordinates)
+				//check if begin and end is not the same
+				if (itemKey.Last() != itemValue.Last())
 				{
-					if (item != null)
+					foreach (var item in coordinates)
 					{
-						if (temp.X != item.X || temp.Y != item.Y)
+						if (item != null)
 						{
-							if (item.areaType == "Station" && item.whatIsIt == itemKey.Last())
+							if (temp.X != item.X || temp.Y != item.Y)
 							{
-								temp.X = item.X;
-								temp.Y = item.Y;
+								if (item.areaType == "Station" && item.whatIsIt == itemKey.Last())
+								{
+									temp.X = item.X;
+									temp.Y = item.Y;
+								}
 							}
-						}
-						if (temp.endX != item.X || temp.endY != item.Y)
-						{
-							if (item.areaType == "Station" && item.whatIsIt == itemValue.Last())
+							if (temp.endX != item.X || temp.endY != item.Y)
 							{
-								temp.endX = item.X;
-								temp.endY = item.Y;
-								temp.endStationName = itemValue.Last();
+								if (item.areaType == "Station" && item.whatIsIt == itemValue.Last())
+								{
+									temp.endX = item.X;
+									temp.endY = item.Y;
+									temp.endStationName = itemValue.Last();
+								}
 							}
-						}
 
+						}
 					}
-				}
-				if (temp.X != temp.endX && temp.Y != temp.endY)
-				{
 					people.Add((Person)fac.GetPerson("Person", temp));
 				}
 				else
 				{
-					Console.WriteLine("I am already at my station");
+					Console.WriteLine("Person spawned at their end location");
 				}
 
 
@@ -252,25 +259,29 @@ namespace RailRoadSimulator
 							{
 								temp.X = item.X;
 								temp.Y = item.Y;
+								break;
 							}
 						}
-						if (temp.endX != item.X || temp.endY != item.Y)
-						{
-							if (item.areaType == "Station" && item.whatIsIt == itemValue.Last())
-							{
-								temp.endX = item.X;
-								temp.endY = item.Y;
-								temp.endStationName = itemValue.Last();
-								if (trains.Capacity <= 1)
-								{
-									//Spawn a Maid
-									people.Add((Maid)fac.GetPerson("Person", temp));
-								}
-							}
-						}
-					}
-						
-					}
+						//if (temp.endX != item.X || temp.endY != item.Y)
+						//{
+						//	if (item.areaType == "Station" && item.whatIsIt == itemValue.Last())
+						//	{
+						//		temp.endX = item.X;
+						//		temp.endY = item.Y;
+						//		temp.endStationName = itemValue.Last();
+						//		if (trains.Capacity <= 1)
+						//		{
+						//			//Spawn a Maid
+						//			people.Add((Maid)fac.GetPerson("Person", temp));
+						//		}
+						//	}
+						//}
+					}					
+				}
+
+				//add the maid to the people list
+				people.Add((Maid)fac.GetPerson("Maid", temp));
+				Console.WriteLine("Maid spawned at loc: " + itemValue);
 
 			}
 			else if (evt.EventType == RailroadEventType.LEAVES_ON_TRACK)

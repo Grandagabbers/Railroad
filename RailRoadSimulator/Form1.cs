@@ -146,7 +146,7 @@ namespace RailRoadSimulator
                 thingsToDraw.Clear();//empty the list 
 
                 //foreach person in manager.people add it to peopleToDraw
-                foreach (var train in manager.trains.ToList())
+                foreach (Train train in manager.trains.ToList())
                 {
                     //IEntity last = manager.trains.Last();
                     thingsToDraw.Add(train);
@@ -159,14 +159,15 @@ namespace RailRoadSimulator
                         if (wait == false)//if wait is false. The person is not in a elevator so it can continue moving. 
                         {
                             ILayout check = fac.coordinates[train.X, train.Y];
+                            train.WalkTo(train.currentRoom);
                             if (check != null && fac.coordinates[check.X, check.Y] == check)
                             {
                                 train.currentRoom = check;
-                                if (train.currentRoom.areaType.Contains("Station")) {
+                                if (train.currentRoom.areaType.Contains("Station") && train.personsInTrain.Count <= train.capacity) {
                                     //manager.CheckIfPeopleAtStation((Train)train);
                                 }
                             }
-                            train.WalkTo(train.currentRoom);
+
                         }
                         wait = false;
                     }
@@ -263,6 +264,7 @@ namespace RailRoadSimulator
                         if (current.capacity >= current.personsInTrain.Count) {
                             //check if there are persons add that station if so let them go in
                             manager.CheckIfPeopleAtStation(current);
+                            //when this is called train teleports for some reason
                             if (current.personsInTrain.Count == 0 && manager.ReturnToRemisePair.Value == true) {
                                 if (current.currentRoom.areaType.Contains("Remise")) {
                                     manager.trains.Remove(current);

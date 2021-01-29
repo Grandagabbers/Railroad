@@ -42,8 +42,10 @@ namespace RailRoadSimulator
                 this.X = this.route[routeCounter].X; //set the current postition to the current position of the route the train is walking
                 this.Y = this.route[routeCounter].Y;
                 routeCounter++;
-                //set isOccupied back to false since this track is no longer occupied
-                current.isOccupied = false;
+                if (current != null) {
+                    //set isOccupied back to false since this track is no longer occupied
+                    current.isOccupied = false;
+                }
             }
 
         }
