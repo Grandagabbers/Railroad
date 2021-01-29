@@ -71,9 +71,7 @@ namespace RailRoadSimulator
 			current.eventQueue.AddLast(trainPath);
 			current.route = trainPath;
 			current.eventQueue.RemoveLast();
-
 		}
-
 		public void CheckIfPeopleAtStation(Train train)
 		{
 			foreach (var person in people.ToList())
@@ -91,8 +89,7 @@ namespace RailRoadSimulator
 				FindPath(train);
 			}
 		}
-
-		public void CheckOutPeople(Train train)
+			public void CheckOutPeople(Train train)
 		{
 			foreach (var person in train.personsInTrain.ToList())
 			{
@@ -103,6 +100,22 @@ namespace RailRoadSimulator
 				}
 			}
 		}
+
+		public void AddMaid(Train train)
+		{
+			foreach (var person in train.personsInTrain.ToList())
+			{
+				//if position is correct remove people from train because they are at their location
+				if (person.endX == train.X && person.endY == train.Y)
+				{
+					if (train.capacity < 1)
+					{
+						people.Add((Maid)fac.GetPerson("Person", temp));
+					}
+				}
+			}
+		}
+
 
 		//Adapter pattern
 		public void Notify(RailroadEvent evt)
@@ -241,10 +254,23 @@ namespace RailRoadSimulator
 								temp.Y = item.Y;
 							}
 						}
+						if (temp.endX != item.X || temp.endY != item.Y)
+						{
+							if (item.areaType == "Station" && item.whatIsIt == itemValue.Last())
+							{
+								temp.endX = item.X;
+								temp.endY = item.Y;
+								temp.endStationName = itemValue.Last();
+								if (trains.Capacity <= 1)
+								{
+									//Spawn a Maid
+									people.Add((Maid)fac.GetPerson("Person", temp));
+								}
+							}
+						}
 					}
-				}
-
-				people.Add((Maid)fac.GetPerson("Maid", temp));
+						
+					}
 
 			}
 			else if (evt.EventType == RailroadEventType.LEAVES_ON_TRACK)
