@@ -9,7 +9,6 @@ namespace RailRoadSimulator
 {
 	public class Track : ILayout
 	{
-		public bool isDubbelTrack { get; set; } = false;
 		public Track(Tile temp)
 		{
 			areaType = temp.areaType;

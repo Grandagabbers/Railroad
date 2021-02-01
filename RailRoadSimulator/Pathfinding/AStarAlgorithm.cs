@@ -1,4 +1,6 @@
-﻿using System;
+﻿using Microsoft.SqlServer.Server;
+using RailRoadSimulator.Factories.LayoutFactory;
+using System;
 using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
@@ -12,7 +14,12 @@ namespace RailRoadSimulator.Pathfinding
 	{
 		//final list to go
 		List<Tile> finalList;
-
+		LayoutFactory fac = new LayoutFactory();
+		public List<string> list { get; set; }
+		public PathFinding()
+		{
+			fac.GenerateEntity();
+		}
 		/// <summary>
 		/// This finds the path
 		/// </summary>
@@ -22,6 +29,20 @@ namespace RailRoadSimulator.Pathfinding
 		public List<Tile> findTiles(List<string> map, Train startLoc, Tile finish)
 		{
 			finalList = new List<Tile>();
+			list = new List<string>();
+
+			//
+			foreach (var item in fac.layout)
+			{
+				if (!item.isOccupied && item.isDubbelTrack)
+				{
+					list.Add(item.whatIsIt.ToString());
+				}
+			}
+
+			//MAKE A LIST with List<string> innnit and a bool isoccupied and bool isdubbeltrack
+			//Use this to set all the isoccupied at each specific item
+
 			//This gets the start coordinates of the train
 			var start = new Tile();
 			start.X = startLoc.X;
@@ -42,6 +63,7 @@ namespace RailRoadSimulator.Pathfinding
 
 			while (activeTiles.Any())
 			{
+				//CHeck here if tile isoccupied and is not dubbeltrack
 				var checkTile = activeTiles.OrderBy(x => x.CostDistance).First();
 
 				if (checkTile.X == finish.X && checkTile.Y == finish.Y)
@@ -60,6 +82,8 @@ namespace RailRoadSimulator.Pathfinding
 							newMapRow[tile.X] = '*';
 							map[tile.Y] = new string(newMapRow);
 						}
+						//set isOccupied to true because this path will now be occupied
+						tile.isOccupied = true;
 						finalList.Add(tile);
 						tile = tile.Parent;
 						if (tile == null)
@@ -68,6 +92,16 @@ namespace RailRoadSimulator.Pathfinding
 							finalList.Reverse();
 							//Console.WriteLine("Map looks like :");
 							//map.ForEach(x => Console.WriteLine(x));
+
+							foreach (var item in finalList) {
+								foreach (var list in fac.layout.ToList()) {
+									if (list.X == item.X && list.Y == item.Y) {
+										fac.layout.Remove(list);
+										fac.layout.Add(item);
+									}
+								}
+							}
+
 							return finalList;
 						}
 					}
@@ -76,7 +110,9 @@ namespace RailRoadSimulator.Pathfinding
 				visitedTiles.Add(checkTile);
 				activeTiles.Remove(checkTile);
 
-				var walkableTiles = GetWalkableTiles(map, checkTile, finish);
+
+
+				var walkableTiles = GetWalkableTiles(list, checkTile, finish);
 
 				foreach (var walkableTile in walkableTiles.ToList())
 				{
@@ -115,10 +151,11 @@ namespace RailRoadSimulator.Pathfinding
 		/// <returns>next possible tiles in a list</returns>
 		private static List<Tile> GetWalkableTiles(List<string> map, Tile currentTile, Tile targetTile)
 		{
+			
 			var possibleTiles = new List<Tile>()
 			{
 				new Tile { X = currentTile.X, Y = currentTile.Y - 1, Parent = currentTile, Cost = currentTile.Cost + 1 },
-				new Tile { X = currentTile.X, Y = currentTile.Y + 1, Parent = currentTile, Cost = currentTile.Cost + 1},
+				new Tile { X = currentTile.X, Y = currentTile.Y + 1, Parent = currentTile, Cost = currentTile.Cost + 1 },
 				new Tile { X = currentTile.X - 1, Y = currentTile.Y, Parent = currentTile, Cost = currentTile.Cost + 1 },
 				new Tile { X = currentTile.X + 1, Y = currentTile.Y, Parent = currentTile, Cost = currentTile.Cost + 1 },
 			};

@@ -13,8 +13,6 @@ namespace RailRoadSimulator
 {
 	public class LayoutFactory : AbstractFactory
 	{
-		//Temporary list of layout
-		public List<TempLayout> tempRooms = new List<TempLayout>();
 		public List<ILayout> layout = new List<ILayout>();
         public List<string> finalLay = new List<string>();
         public List<Tile> allTiles = new List<Tile>();
@@ -60,6 +58,7 @@ namespace RailRoadSimulator
                             tile.Y = y;
                             allTiles.Add(tile);
                             break;
+                        //This is the remise trains come and go to
                         case 'R':
                             tile.areaType = "Remise";
                             tile.whatIsIt = singleChar;

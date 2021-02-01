@@ -21,6 +21,7 @@ namespace RailRoadSimulator
 		public int CostDistance => Cost + Distance;
 		public char whatIsIt { get; set; }
 		public bool isOccupied { get; set; } = false;
+		public bool isDubbelTrack { get; set; } = false;
 		public ILayout()
 		{
 

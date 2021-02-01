@@ -8,6 +8,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using RailroadEvents;
+using RailRoadSimulator.Factories.LayoutFactory;
 using RailRoadSimulator.Pathfinding;
 
 namespace RailRoadSimulator
@@ -23,7 +24,9 @@ namespace RailRoadSimulator
 		public List<IEntity> trains = new List<IEntity>();
 
 		List<string> layout = new List<string>();
+
 		EntityFactory fac = new EntityFactory();
+		LayoutFactory layFac { get; set; }
 		public ILayout[,] coordinates { get; set; }
 		PathFinding path = new PathFinding();
 		public KeyValuePair<int, bool> Leaves { get; set; }
@@ -32,7 +35,10 @@ namespace RailRoadSimulator
 		{
 			this.main = main;
 			this.coordinates = coordinates;
-			layout = System.IO.File.ReadAllLines(@"..\..\final-assignment.trc").ToList<String>();
+
+			layFac = new LayoutFactory();
+			layFac.GenerateEntity();
+			layout = System.IO.File.ReadAllLines(@"..\..\final-assignment.trc").ToList<string>();
 
 			RailroadEventManager.Register(this);
 			//To speed up for testing
@@ -65,6 +71,8 @@ namespace RailRoadSimulator
 			Tile endTile = new Tile();
 			endTile.X = current.endX;
 			endTile.Y = current.endY;
+
+			//send alltiles because we need to check which tiles are occupied
 			List<Tile> trainPath = path.findTiles(layout, current, endTile);
 			List<Tile> last = current.eventQueue.LastOrDefault();
 
