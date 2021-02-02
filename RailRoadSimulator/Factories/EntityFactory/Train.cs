@@ -16,6 +16,8 @@ namespace RailRoadSimulator
 		public bool hasPath { get; set; } = false;
 		public int firstX { get; set; }
 		public int firstY { get; set; }
+		public int Xend { get; set; } = 0;
+		public int Yend { get; set; } = 0;
 		public bool waitCount { get; set; } = false;
 		public int waitAmount { get; set; } = 0;
 

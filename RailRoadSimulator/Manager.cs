@@ -102,7 +102,10 @@ namespace RailRoadSimulator
 		/// <param name="train"></param>
 		public void GoToNextStation(Train train)
 		{
-			FindPath(train);
+			if (!train.hasPath) {
+				train.routeCounter = 0;
+				FindPath(train);
+			}
 		}
 
 		public void CheckIfPeopleAtStation(Train train)
@@ -129,7 +132,7 @@ namespace RailRoadSimulator
 				}
 			}
 			//if there are people in the train find the route the most people need to go to
-			if (train.personsInTrain.Count > 0 && !train.hasPath)
+			if (!train.hasPath)
 			{
 				train.routeCounter = 0;
 				FindPath(train);
@@ -149,12 +152,6 @@ namespace RailRoadSimulator
 			//	FindPath(train);
 			//}
 
-			//if train has waited 5 ticks
-			else
-			{
-				
-				//Console.WriteLine("Train is waiting for: " + train.waitCount);
-			}
 		}
 			public void CheckOutPeople(Train train)
 		{
@@ -418,9 +415,9 @@ namespace RailRoadSimulator
 					}
 				}
 			}
-			if (train.hasPath == false) {
-				FindPath(train);
-			}
+			//if (train.hasPath == false) {
+			//	FindPath(train);
+			//}
 		}
 	}
 

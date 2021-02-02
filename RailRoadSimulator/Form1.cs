@@ -46,8 +46,8 @@ namespace RailRoadSimulator
 		public MainForm()
 		{
 			//set the tick frequency
-			timer.Interval = 250;
-            timerForMaids.Interval = 250;
+			timer.Interval = 150;
+            timerForMaids.Interval = 150;
             slowTimer.Enabled = false;
             fac.GenerateEntity();
             manager = new Manager(fac.coordinates, this);
@@ -65,6 +65,7 @@ namespace RailRoadSimulator
 
             //call the update function after each timer tick.
             timer.Tick += new EventHandler(UpdateImage);
+            timerForMaids.Tick += (UpdateEvents);
         }
 
         /// <summary>
@@ -74,7 +75,7 @@ namespace RailRoadSimulator
         /// <param name="e"></param>
        private void UpdateImage(object sender, EventArgs e)
         {
-            timerForMaids.Tick += (UpdateEvents);
+
             trainLayout.Dispose();//empty the Bitmap
             trainLayout = new Bitmap(background.Width, background.Height); //create new one
 
@@ -145,10 +146,6 @@ namespace RailRoadSimulator
                             if (check != null && fac.coordinates[check.X, check.Y] == check)
                             {
                                 train.currentRoom = check;
-                                if (!train.waitCount)
-                                {
-                                    train.WalkTo(train.currentRoom);
-                                }
                                 if (train.currentRoom.areaType.Contains("Station") && train.personsInTrain.Count < train.capacity && manager.people.Count > 0) {
                                     //this works now but if no one checks in we need to continue
                                     manager.CheckIfPeopleAtStation((Train)train);
@@ -163,7 +160,10 @@ namespace RailRoadSimulator
                                     train.waitAmount = 0;
                                     train.waitCount = false;
                                 }
-
+                                if (!train.waitCount)
+                                {
+                                    train.WalkTo(train.currentRoom);
+                                }
                             }
 
                         }
@@ -218,9 +218,9 @@ namespace RailRoadSimulator
                 {
                     var current = (Train)train;
                     //we want to save the endX and endY only once until end is reached
-                    if (endX == 0 && endY == 0) {
-                        endX = current.firstX;
-                        endY = current.firstY;
+                    if (current.Xend == 0 && current.Yend == 0) {
+                        current.Xend = current.firstX;
+                        current.Yend = current.firstY;
                     }
                     if ((train.eventQueue.Count > 0 && train.eventQueue.FirstOrDefault().LastOrDefault().X == train.X && train.eventQueue.FirstOrDefault().LastOrDefault().Y == train.Y))//selects shortest path to the final destination of its event.
                     {
@@ -254,10 +254,12 @@ namespace RailRoadSimulator
 
                         }
                     }
-                    if (train.currentRoom != null && train.eventQueue.Count == 0 && endX == train.X && endY == train.Y)
+                    if (train.currentRoom != null && train.eventQueue.Count == 0 && current.Xend == train.X && current.Yend == train.Y)
                     {
-                        endX = train.endX;
-                        endY = train.endY;
+                        current.Xend = train.endX;
+                        current.Yend = train.endY;
+
+
                         current.hasPath = false;
                         if (current.personsInTrain.Count > 0) {
                             //checkout persons because they are at their station
@@ -268,7 +270,6 @@ namespace RailRoadSimulator
                         if (current.capacity > current.personsInTrain.Count) {
                             //check if there are persons add that station if so let them go in
                             manager.CheckIfPeopleAtStation(current);
-
                             //when this is called train teleports for some reason
                            // if (current.personsInTrain.Count == 0 && manager.ReturnToRemisePair.First().Value == true) {
                              //   if (current.currentRoom.areaType.Contains("Remise")) {
@@ -277,10 +278,8 @@ namespace RailRoadSimulator
                                 //manager.ReturnToRemise(current);
                             //}
                         }
-                        
-                        if (current.personsInTrain.Count == 0) {
+                        if (!current.hasPath) {
                             manager.GoToNextStation(current);
-                            Console.WriteLine("train is at station and has waited 5 ticks");
                         }
 
                     }
