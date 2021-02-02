@@ -83,8 +83,8 @@ namespace RailRoadSimulator
                 manager.Leaves = new KeyValuePair<int, bool>(manager.Leaves.Key, false);
                 //multiply by 1000 key is given in seconds
                 slowTimer.Interval = manager.Leaves.Key * 1000;
-                RailroadEventManager.RRTE_Factor = RailroadEventManager.RRTE_Factor / 2f;
-                timer.Interval = timer.Interval * 2;
+               // RailroadEventManager.RRTE_Factor = RailroadEventManager.RRTE_Factor / 2f;
+               // timer.Interval = timer.Interval * 2;
                 slowTimer.Start();
                 //set amount and enabled back to 0 to make sure this event can happen again
                 slowTimer.Enabled = true;
@@ -95,7 +95,7 @@ namespace RailRoadSimulator
             //check enabled to ensure it doesnt go at the start of the application
             if (slowTimer != null && amount == 0 && slowTimer.Enabled == true) {
 
-                slowTimer.Tick += new EventHandler(SpeedUp);
+               // slowTimer.Tick += new EventHandler(SpeedUp);
                 amount++;
 
             }
@@ -145,11 +145,25 @@ namespace RailRoadSimulator
                             if (check != null && fac.coordinates[check.X, check.Y] == check)
                             {
                                 train.currentRoom = check;
+                                if (!train.waitCount)
+                                {
+                                    train.WalkTo(train.currentRoom);
+                                }
                                 if (train.currentRoom.areaType.Contains("Station") && train.personsInTrain.Count < train.capacity && manager.people.Count > 0) {
                                     //this works now but if no one checks in we need to continue
                                     manager.CheckIfPeopleAtStation((Train)train);
+                                    train.waitCount = true;
                                 }
-                                train.WalkTo(train.currentRoom);
+                                if (train.waitCount) {
+                                    train.waitAmount++;
+                                }
+                                if (train.waitAmount == 5)
+                                {
+                                    Console.WriteLine("Train has waited 5 ticks");
+                                    train.waitAmount = 0;
+                                    train.waitCount = false;
+                                }
+
                             }
 
                         }
@@ -243,7 +257,8 @@ namespace RailRoadSimulator
                     if (train.currentRoom != null && train.eventQueue.Count == 0 && endX == train.X && endY == train.Y)
                     {
                         endX = train.endX;
-                        endY = train.endY; 
+                        endY = train.endY;
+                        current.hasPath = false;
                         if (current.personsInTrain.Count > 0) {
                             //checkout persons because they are at their station
                             manager.CheckOutPeople(current);
@@ -262,8 +277,12 @@ namespace RailRoadSimulator
                                 //manager.ReturnToRemise(current);
                             //}
                         }
+                        
+                        if (current.personsInTrain.Count == 0) {
+                            manager.GoToNextStation(current);
+                            Console.WriteLine("train is at station and has waited 5 ticks");
+                        }
 
-                        current.hasPath = false;
                     }
                 }
                 ///check if a evac is going on, if so set person.evac to true 

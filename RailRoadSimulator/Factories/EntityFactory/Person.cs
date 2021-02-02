@@ -31,8 +31,8 @@ namespace RailRoadSimulator
 		/// <returns>true or false based on if the person has died or not</returns>
 		public bool isWaiting()
 		{
-			if (timer.ElapsedMilliseconds >= 20000) {
-				Console.WriteLine("20 secs passed so die");
+			if (timer.ElapsedMilliseconds >= 60000) {
+				Console.WriteLine("60 secs passed so die");
 				timer.Stop();
 				return true;
 			}

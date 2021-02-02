@@ -96,9 +96,17 @@ namespace RailRoadSimulator
 			current.eventQueue.RemoveLast();
 		}
 
+		/// <summary>
+		/// If personintrain is still 0 after reaching goal, go to next station
+		/// </summary>
+		/// <param name="train"></param>
+		public void GoToNextStation(Train train)
+		{
+			FindPath(train);
+		}
+
 		public void CheckIfPeopleAtStation(Train train)
 		{
-			train.waitCount++;
 			//make function that people get in even if it is not their endstation
 
 			//check if train is not full
@@ -121,11 +129,10 @@ namespace RailRoadSimulator
 				}
 			}
 			//if there are people in the train find the route the most people need to go to
-			if (train.personsInTrain.Count > 0 && train.hasPath == false)
+			if (train.personsInTrain.Count > 0 && !train.hasPath)
 			{
 				train.routeCounter = 0;
 				FindPath(train);
-				train.waitCount = 0;
 			}
 			//this does not work currently
 			//else if (train.routeCounter == 0 || train.route == null && train.endX != train.X && train.endY != train.Y)
@@ -143,15 +150,10 @@ namespace RailRoadSimulator
 			//}
 
 			//if train has waited 5 ticks
-			if (train.waitCount == 5)
-			{
-				FindPath(train);
-				//set waitcount back to 0 
-				train.waitCount = 0;
-			}
 			else
 			{
-				Console.WriteLine("Train is waiting for: " + train.waitCount);
+				
+				//Console.WriteLine("Train is waiting for: " + train.waitCount);
 			}
 		}
 			public void CheckOutPeople(Train train)
@@ -307,8 +309,8 @@ namespace RailRoadSimulator
 			else if (evt.EventType == RailroadEventType.CLEANING_EMERGENCY)
 			{
 				//clean everything, so create maids
-				Console.WriteLine("Cleaning emergency Key is: " + itemKey);
-				Console.WriteLine("Cleaning emergency Value is: " + itemValue);
+				//Console.WriteLine("Cleaning emergency Key is: " + itemKey);
+				//Console.WriteLine("Cleaning emergency Value is: " + itemValue);
 
 				TempIdentity temp = new TempIdentity();
 				temp.areaType = "Maid";
@@ -345,7 +347,7 @@ namespace RailRoadSimulator
 
 				//add the maid to the people list
 				people.Add((Maid)fac.GetPerson("Maid", temp));
-				Console.WriteLine("Maid spawned at loc: " + itemValue);
+				//Console.WriteLine("Maid spawned at loc: " + itemValue);
 
 			}
 			else if (evt.EventType == RailroadEventType.LEAVES_ON_TRACK)

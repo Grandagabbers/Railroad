@@ -16,7 +16,8 @@ namespace RailRoadSimulator
 		public bool hasPath { get; set; } = false;
 		public int firstX { get; set; }
 		public int firstY { get; set; }
-		public int waitCount { get; set; } = 0;
+		public bool waitCount { get; set; } = false;
+		public int waitAmount { get; set; } = 0;
 
 		public List<string> allStations = new List<string>()
 		{
