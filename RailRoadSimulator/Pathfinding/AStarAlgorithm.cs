@@ -1,5 +1,4 @@
 ﻿using Microsoft.SqlServer.Server;
-using RailRoadSimulator.Factories.LayoutFactory;
 using System;
 using System.Collections.Generic;
 using System.Drawing;
@@ -24,14 +23,14 @@ namespace RailRoadSimulator.Pathfinding
 		/// This finds the path
 		/// </summary>
 		/// <param name="map">the layout of the map</param>
-		/// <param name="startLoc">startlocation</param>
+		/// <param name="train">startlocation</param>
 		/// <param name="endLoc">endlocation</param>
-		public List<Tile> findTiles(List<string> map, Train startLoc, Tile finish)
+		public List<Tile> findTiles(List<string> map, Train train)
 		{
 			finalList = new List<Tile>();
 			list = new List<string>();
 
-			//
+			
 			foreach (var item in fac.layout)
 			{
 				if (!item.isOccupied && item.isDubbelTrack)
@@ -45,15 +44,19 @@ namespace RailRoadSimulator.Pathfinding
 
 			//This gets the start coordinates of the train
 			var start = new Tile();
-			start.X = startLoc.X;
-			start.Y = startLoc.Y;
-			//start.Y = map.FindIndex(x => x.Contains(startLoc));
-			//start.X = map[start.Y].IndexOf(startLoc);
+			start.X = train.X;
+			start.Y = train.Y;
+
+			//start.Y = map.FindIndex(x => x.Contains(train.startLocation));
+			//start.X = map[start.Y].IndexOf(train.startLocation);
 
 			//This gets the end coordinates of the train
-			//var finish = new Tile();
-			//finish.Y = map.FindIndex(x => x.Contains(endLoc));
-			//finish.X = map[finish.Y].IndexOf(endLoc);
+			var finish = new Tile();
+			finish.X = train.endX;
+			finish.Y = train.endY;
+
+			//finish.Y = map.FindIndex(x => x.Contains(train.destination));
+			//finish.X = map[finish.Y].IndexOf(train.destination);
 
 			start.SetDistance(finish.X, finish.Y);
 
@@ -90,17 +93,17 @@ namespace RailRoadSimulator.Pathfinding
 						{
 							//reverse the final list to ensure it is from the start to the end 
 							finalList.Reverse();
-							//Console.WriteLine("Map looks like :");
+							Console.WriteLine("Train has path, will go to " + finish.X.ToString() + finish.Y.ToString());
 							//map.ForEach(x => Console.WriteLine(x));
 
-							foreach (var item in finalList) {
-								foreach (var list in fac.layout.ToList()) {
-									if (list.X == item.X && list.Y == item.Y) {
-										fac.layout.Remove(list);
-										fac.layout.Add(item);
-									}
-								}
-							}
+							//foreach (var item in finalList.ToList()) {
+							//	foreach (var list in fac.layout.ToList()) {
+							//		if (list.X == item.X && list.Y == item.Y) {
+							//			fac.layout.Remove(list);
+							//			fac.layout.Add(item);
+							//		}
+							//	}
+							//}
 
 							return finalList;
 						}
@@ -112,7 +115,7 @@ namespace RailRoadSimulator.Pathfinding
 
 
 
-				var walkableTiles = GetWalkableTiles(list, checkTile, finish);
+				var walkableTiles = GetWalkableTiles(map, checkTile, finish);
 
 				foreach (var walkableTile in walkableTiles.ToList())
 				{

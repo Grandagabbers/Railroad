@@ -34,6 +34,8 @@ namespace RailRoadSimulator
         public List<IEntity> newPeople = new List<IEntity>();
         //private Factory
 
+        int endX = 0;
+        int endY = 0;
 
         //Form atributes
         private int buttonCounter { get; set; }
@@ -55,34 +57,14 @@ namespace RailRoadSimulator
 			InitializeComponent();
             railRoadMap.BackgroundImage = background;
 
-            //Setup buttons
-            //int distanceButtons = 100;
-            //pauseButton.Location = new Point(background.Width + distanceButtons, railRoadMap.Location.Y + distanceButtons);
-            //pauseButton.Size = new Size(250, 100);
-            //pauseButton.Text = "Pauze";
-            //pauseButton.Click += new EventHandler(PauseButton_Click);
-            //speedButton.Location = new Point( 10,  10);
-            //speedButton.Size = pauseButton.Size;
-            //speedButton.Text = "Versnellen";
-            //speedButton.Click += new EventHandler(SpeedButton_Click);
-            //stopButton.Location = new Point(background.Width + distanceButtons, speedButton.Location.Y + distanceButtons);
-            //stopButton.Size = pauseButton.Size;
-            //stopButton.Text = "Stop";
-            //stopButton.Click += new EventHandler(StopButton_Click);
-            //Controls.Add(pauseButton);
-            //Controls.Add(speedButton);
-            //Controls.Add(stopButton);
 
-
-            //Start the hotel events 
+            //Start the railroad events 
             RailroadEventManager.Start();
 			timer.Start();
             timerForMaids.Start();
 
             //call the update function after each timer tick.
             timer.Tick += new EventHandler(UpdateImage);
-
-
         }
 
         /// <summary>
@@ -96,6 +78,7 @@ namespace RailRoadSimulator
             trainLayout.Dispose();//empty the Bitmap
             trainLayout = new Bitmap(background.Width, background.Height); //create new one
 
+            //if leaves is called
             if (manager.Leaves.Value == true) {
                 manager.Leaves = new KeyValuePair<int, bool>(manager.Leaves.Key, false);
                 //multiply by 1000 key is given in seconds
@@ -127,11 +110,11 @@ namespace RailRoadSimulator
                     newPeople.Add(people);
                     if (people.areaType.Contains("Person")) {
                         var pers = (Person)people;
+                        //check if person has died, if so remove it
                         bool hasDied = pers.isWaiting();
                         if (hasDied) {
                             manager.people.Remove(pers);
                             newPeople.Remove(pers);
-
                         }
                     }
 
@@ -159,13 +142,14 @@ namespace RailRoadSimulator
                         if (wait == false)//if wait is false. The person is not in a elevator so it can continue moving. 
                         {
                             ILayout check = fac.coordinates[train.X, train.Y];
-                            train.WalkTo(train.currentRoom);
                             if (check != null && fac.coordinates[check.X, check.Y] == check)
                             {
                                 train.currentRoom = check;
-                                if (train.currentRoom.areaType.Contains("Station") && train.personsInTrain.Count <= train.capacity) {
-                                    //manager.CheckIfPeopleAtStation((Train)train);
+                                if (train.currentRoom.areaType.Contains("Station") && train.personsInTrain.Count < train.capacity && manager.people.Count > 0) {
+                                    //this works now but if no one checks in we need to continue
+                                    manager.CheckIfPeopleAtStation((Train)train);
                                 }
+                                train.WalkTo(train.currentRoom);
                             }
 
                         }
@@ -218,7 +202,12 @@ namespace RailRoadSimulator
             {
                 if (train.areaType.Contains("Train")) //checks if the person is from the customer class
                 {
-
+                    var current = (Train)train;
+                    //we want to save the endX and endY only once until end is reached
+                    if (endX == 0 && endY == 0) {
+                        endX = current.firstX;
+                        endY = current.firstY;
+                    }
                     if ((train.eventQueue.Count > 0 && train.eventQueue.FirstOrDefault().LastOrDefault().X == train.X && train.eventQueue.FirstOrDefault().LastOrDefault().Y == train.Y))//selects shortest path to the final destination of its event.
                     {
 
@@ -251,36 +240,30 @@ namespace RailRoadSimulator
 
                         }
                     }
-                    if (train.eventQueue.Count == 0 && (train.endY == train.Y && train.endX == train.X))
+                    if (train.currentRoom != null && train.eventQueue.Count == 0 && endX == train.X && endY == train.Y)
                     {
-                        var current = (Train)train;
-
+                        endX = train.endX;
+                        endY = train.endY; 
                         if (current.personsInTrain.Count > 0) {
                             //checkout persons because they are at their station
                             manager.CheckOutPeople(current);
                         }
 
                         //if the capacity of the train is not filled after checkout
-                        if (current.capacity >= current.personsInTrain.Count) {
+                        if (current.capacity > current.personsInTrain.Count) {
                             //check if there are persons add that station if so let them go in
                             manager.CheckIfPeopleAtStation(current);
+
                             //when this is called train teleports for some reason
-                            if (current.personsInTrain.Count == 0 && manager.ReturnToRemisePair.Value == true) {
-                                if (current.currentRoom.areaType.Contains("Remise")) {
-                                    manager.trains.Remove(current);
-                                }
-                                manager.ReturnToRemise(current);
-                            }
+                           // if (current.personsInTrain.Count == 0 && manager.ReturnToRemisePair.First().Value == true) {
+                             //   if (current.currentRoom.areaType.Contains("Remise")) {
+                               //     manager.trains.Remove(current);
+                                //}
+                                //manager.ReturnToRemise(current);
+                            //}
                         }
 
-
-                        //foreach (var person in current.personsInTrain.ToList())
-                        //{
-                        //    if (person.endX == current.endX && person.endY == current.endY)
-                        //    {
-                        //        current.personsInTrain.Remove(person);
-                        //    }
-                        //}
+                        current.hasPath = false;
                     }
                 }
                 ///check if a evac is going on, if so set person.evac to true 

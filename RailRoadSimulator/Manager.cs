@@ -8,7 +8,6 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using RailroadEvents;
-using RailRoadSimulator.Factories.LayoutFactory;
 using RailRoadSimulator.Pathfinding;
 
 namespace RailRoadSimulator
@@ -30,7 +29,7 @@ namespace RailRoadSimulator
 		public ILayout[,] coordinates { get; set; }
 		PathFinding path = new PathFinding();
 		public KeyValuePair<int, bool> Leaves { get; set; }
-		public KeyValuePair<char, bool> ReturnToRemisePair { get; set; }
+		public Dictionary<char, bool> ReturnToRemisePair { get; set; }
 		public Manager(ILayout[,] coordinates, MainForm main)
 		{
 			this.main = main;
@@ -47,59 +46,112 @@ namespace RailRoadSimulator
 
 		public void FindPath(Train current)
 		{
-			Dictionary<Point, int> amount = new Dictionary<Point, int>();
-			//Console.WriteLine("current train is full");
-			foreach (var item in current.personsInTrain)
-			{
-				Point test = new Point(item.endX, item.endY);
-				if (amount.Keys.Contains(test))
-				{
-					amount[test] = amount.Values.First() + 1;
-				}
-				else
-				{
-					amount.Add(test, 1);
-				}
-			}
-			if (amount.Count > 0)
-			{
-				var keyOfMaxValue = amount.Aggregate((x, y) => x.Value > y.Value ? x : y).Key;
-				current.endX = keyOfMaxValue.X;
-				current.endY = keyOfMaxValue.Y;
-			}
+			//THESE LINES DETERMINE THE PATH BASED ON THE PEOPLE IN THE TRAIN
+			//THIS IS OLD AND NOT HOW TRAINS WORK 
+			//Dictionary<Point, int> amount = new Dictionary<Point, int>();
+			////Console.WriteLine("current train is full");
+			//foreach (var item in current.personsInTrain)
+			//{
+			//	Point test = new Point(item.endX, item.endY);
+			//	if (amount.Keys.Contains(test))
+			//	{
+			//		amount[test] = amount.Values.First() + 1;
+			//	}
+			//	else
+			//	{
+			//		amount.Add(test, 1);
+			//	}
+			//}
+			//if (amount.Count > 0)
+			//{
+			//	var keyOfMaxValue = amount.Aggregate((x, y) => x.Value > y.Value ? x : y).Key;
+			//	current.endX = keyOfMaxValue.X;
+			//	current.endY = keyOfMaxValue.Y;
+			//}
+
 			//make the endTile of the train
-			Tile endTile = new Tile();
-			endTile.X = current.endX;
-			endTile.Y = current.endY;
+			//Tile endTile = new Tile();
+			//endTile.X = current.endX;
+			//endTile.Y = current.endY;
 
-			//send alltiles because we need to check which tiles are occupied
-			List<Tile> trainPath = path.findTiles(layout, current, endTile);
-			List<Tile> last = current.eventQueue.LastOrDefault();
+			List<Tile> trainPath = path.findTiles(layout, current);
+			current.hasPath = true;
 
+			current.NextStation(current);
+			foreach (var item in coordinates) {
+				if (item != null)
+				{
+					if (current.endX != item.X || current.endY != item.Y)
+					{
+						if (item.areaType == "Station" && item.whatIsIt == current.destination)
+						{
+							current.endX = item.X;
+							current.endY = item.Y;
+						}
+					}
+				}
+			}
 			current.eventQueue.AddLast(trainPath);
 			current.route = trainPath;
 			current.eventQueue.RemoveLast();
 		}
+
 		public void CheckIfPeopleAtStation(Train train)
 		{
-			foreach (var person in people.ToList())
-			{
-				if (person.areaType.Contains("Person") && train.X == person.X && train.Y == person.Y && train.capacity >= train.personsInTrain.Count)
+			train.waitCount++;
+			//make function that people get in even if it is not their endstation
+
+			//check if train is not full
+			if (train.personsInTrain.Count < train.capacity) {
+				foreach (var person in people.ToList())
 				{
-					Console.WriteLine("Person checked in");
-					train.personsInTrain.Add((Person)person);
-					//remove people because they are now in train
-					people.Remove(person);
+					if (person.areaType.Contains("Person") && train.X == person.X && train.Y == person.Y)
+					{
+						Person pers = (Person)person;
+						bool checkedIn = pers.CheckIn(train);
+						//if person endloc is same as train endloc check in, else not
+						//if (checkedIn)
+						//{
+							Console.WriteLine("Person checked in");
+							train.personsInTrain.Add((Person)person);
+							//remove people because they are now in train
+							people.Remove(person);
+						//}
+					}
 				}
 			}
-			if (train.personsInTrain.Count > 0)
+			//if there are people in the train find the route the most people need to go to
+			if (train.personsInTrain.Count > 0 && train.hasPath == false)
 			{
 				train.routeCounter = 0;
 				FindPath(train);
+				train.waitCount = 0;
+			}
+			//this does not work currently
+			//else if (train.routeCounter == 0 || train.route == null && train.endX != train.X && train.endY != train.Y)
+			//{
+			//	foreach (var item in coordinates)
+			//	{
+			//		if (item != null && item.areaType == "Station" && item.whatIsIt == train.destination)
+			//		{
+			//			train.endX = item.X;
+			//			train.endY = item.Y;
+			//		}
+			//	}
+			//	//find path to end destination if there is no route
+			//	FindPath(train);
+			//}
+
+			//if train has waited 5 ticks
+			if (train.waitCount == 5)
+			{
+				FindPath(train);
+				//set waitcount back to 0 
+				train.waitCount = 0;
 			}
 			else
 			{
-				Console.WriteLine("No one to check in, continue to location");
+				Console.WriteLine("Train is waiting for: " + train.waitCount);
 			}
 		}
 			public void CheckOutPeople(Train train)
@@ -185,11 +237,16 @@ namespace RailRoadSimulator
 				{
 					number = int.Parse(extract);
 				}
+				//this is the amount of wagons the train has
 				temp.amountOfWagons = number;
 				//Spawn a train
 				trains.Add((Train)fac.GetPerson("Train", temp));
+				var cur = (Train)trains.Last();
+				cur.startLocation = "R";
 
 				FindPath((Train)trains.Last());
+
+
 				//Key is amount of wagons
 				//Value is startlocation of train
 				//Console.WriteLine("Amount of wagons Key is: " + itemKey);
@@ -201,6 +258,18 @@ namespace RailRoadSimulator
 				TempIdentity temp = new TempIdentity();
 
 				temp.areaType = "Person";
+
+				if (itemKey.Last() != itemValue.Last()) {
+
+				//	//look for start loc
+				//	temp.Y = layout.FindIndex(x => x.Contains(itemKey.Last()));
+				//	temp.X = layout[temp.Y].IndexOf(itemKey.Last());
+
+				//	//look for end loc
+				//temp.endY = layout.FindIndex(x => x.Contains(itemValue.Last()));
+				//temp.endX = layout[temp.endY].IndexOf(itemValue.Last());
+				//temp.endStationName = itemValue.Last();
+				}
 				//check if begin and end is not the same
 				if (itemKey.Last() != itemValue.Last())
 				{
@@ -234,19 +303,6 @@ namespace RailRoadSimulator
 				{
 					Console.WriteLine("Person spawned at their end location");
 				}
-
-
-				//set startcoordinates
-				//check if train is at station, if so then step in train
-				//start timer, if person waits too long for train -> delete person: he dies
-
-
-				//Key is start station
-				//Value is end station
-				//Console.WriteLine("Person spawned, Station Key is: " + itemKey);
-				//Console.WriteLine("Person spawned, Station Value is: " + itemValue);
-
-
 			}
 			else if (evt.EventType == RailroadEventType.CLEANING_EMERGENCY)
 			{
@@ -341,27 +397,9 @@ namespace RailRoadSimulator
 					}
 				}
 				//set keyvaluepair use this to determine which train has to come back to remise
-				ReturnToRemisePair = new KeyValuePair<char, bool>(Char.Parse(itemKey), true);
-				//ReturnToRemise(train);
+				//ReturnToRemisePair = new KeyValuePair<char, bool>(Char.Parse(itemKey), true);
 
-				//Find the best path back to remise
-				//FindPath(train);
 
-				//itemKey.Last();
-				//foreach (var item in coordinates)
-				//{
-				//	if (item != null)
-				//	{
-				//		if (item.areaType == itemKey && item.whatIsIt == itemValue.Last())
-				//		{
-				//			temp.endX = item.X;
-				//			temp.endY = item.Y;
-				//			temp.endStationName = itemValue.Last();
-				//			trains.Remove((Train)fac.GetPerson("Train", temp));//Train removed
-				//			Console.WriteLine("Train is loesoe");//test
-				//		}
-				//	}
-				//}
 			}
 		}
 		public void ReturnToRemise(Train train)
@@ -378,7 +416,9 @@ namespace RailRoadSimulator
 					}
 				}
 			}
-			FindPath(train);
+			if (train.hasPath == false) {
+				FindPath(train);
+			}
 		}
 	}
 
