@@ -375,26 +375,11 @@ namespace RailRoadSimulator
 			}
 			else if (evt.EventType == RailroadEventType.RETIRE_TRAIN)
 			{
-				//start pathfinding at station itemKey
-
 				//Key is where to go from?
 				//value is null
 				Console.WriteLine("Retire Key is: " + itemKey);
 				Console.WriteLine("Retire Value is: " + itemValue);
-				//TempIdentity temp = new TempIdentity();
 
-				//foreach (var item in coordinates)
-				//{
-				//	if (item != null)
-				//	{
-				//		if (item.areaType == "Remise")
-				//		{
-				//			temp.endX = item.X;
-				//			temp.endY = item.Y;
-				//			break;
-				//		}
-				//	}
-				//}
 				//set keyvaluepair use this to determine which train has to come back to remise
 				ReturnToRemisePair.Add(new KeyValuePair<string, bool>(itemKey, true));
 
@@ -416,7 +401,8 @@ namespace RailRoadSimulator
 					}
 				}
 			}
-				FindPath(train);	
+			train.routeCounter = 0;
+			FindPath(train);
 		}
 	}
 

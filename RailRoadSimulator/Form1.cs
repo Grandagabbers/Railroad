@@ -84,8 +84,8 @@ namespace RailRoadSimulator
                 manager.Leaves = new KeyValuePair<int, bool>(manager.Leaves.Key, false);
                 //multiply by 1000 key is given in seconds
                 slowTimer.Interval = manager.Leaves.Key * 1000;
-               // RailroadEventManager.RRTE_Factor = RailroadEventManager.RRTE_Factor / 2f;
-               // timer.Interval = timer.Interval * 2;
+                RailroadEventManager.RRTE_Factor = RailroadEventManager.RRTE_Factor / 2f;
+                timer.Interval = timer.Interval * 2;
                 slowTimer.Start();
                 //set amount and enabled back to 0 to make sure this event can happen again
                 slowTimer.Enabled = true;
@@ -96,7 +96,7 @@ namespace RailRoadSimulator
             //check enabled to ensure it doesnt go at the start of the application
             if (slowTimer != null && amount == 0 && slowTimer.Enabled == true) {
 
-               // slowTimer.Tick += new EventHandler(SpeedUp);
+                slowTimer.Tick += new EventHandler(SpeedUp);
                 amount++;
 
             }
@@ -156,7 +156,7 @@ namespace RailRoadSimulator
                                 }
                                 if (train.waitAmount == 5)
                                 {
-                                    Console.WriteLine("Train has waited 5 ticks");
+                                    //Console.WriteLine("Train has waited 5 ticks");
                                     train.waitAmount = 0;
                                     train.waitCount = false;
                                 }
@@ -222,38 +222,6 @@ namespace RailRoadSimulator
                         current.Xend = current.firstX;
                         current.Yend = current.firstY;
                     }
-                    if ((train.eventQueue.Count > 0 && train.eventQueue.FirstOrDefault().LastOrDefault().X == train.X && train.eventQueue.FirstOrDefault().LastOrDefault().Y == train.Y))//selects shortest path to the final destination of its event.
-                    {
-
-                        train.eventStarted = true;
-                        if (timerTickCount - train.timeBusyEvent >= 250 && manager.evacuation == false) //after around 4.8 seconds goes to next event in the queue (LinkedList).
-                        {
-
-                            if (manager.evacuation == false)
-                            {
-
-                                if (train.eventQueue.Count > 0) //Removes first element in the list.
-                                {
-                                    train.eventQueue.RemoveFirst();
-                                    train.route.Clear();
-                                }
-                                ////find new path
-                                //if (train.eventQueue.Count == 0 && (train.X != train.currentRoom.X && train.Y != train.currentRoom.Y))
-                                //{
-                                //    //IEntity end = current.room;
-                                //    manager.FindPath((Train)train);
-                                //}
-                                //if (train.eventQueue.Count > 0)
-                                //{
-                                //    //IRoom end = train.eventQueue.First().Last();
-                                //    manager.FindPath((Train)train);
-                                //}
-                            }
-
-                            train.eventStarted = false;
-
-                        }
-                    }
                     if (train.currentRoom != null && train.eventQueue.Count == 0 && current.Xend == train.X && current.Yend == train.Y)
                     {
                         current.Xend = train.endX;
@@ -271,11 +239,13 @@ namespace RailRoadSimulator
                             //check if there are persons add that station if so let them go in
                             manager.CheckIfPeopleAtStation(current);
                             //when this is called train teleports for some reason
-                           // if (current.personsInTrain.Count == 0 && manager.ReturnToRemisePair.First().Value == true) {
-                             //   if (current.currentRoom.areaType.Contains("Remise")) {
-                               //     manager.trains.Remove(current);
-                                //}
-                                //manager.ReturnToRemise(current);
+                            //if (current.personsInTrain.Count == 0 && manager.ReturnToRemisePair.First().Value == true)
+                            //{
+                            //    if (current.currentRoom.areaType.Contains("Remise"))
+                            //    {
+                            //        manager.trains.Remove(current);
+                            //    }
+                            //    manager.ReturnToRemise(current);
                             //}
                         }
                         if (!current.hasPath) {
@@ -288,6 +258,7 @@ namespace RailRoadSimulator
                         foreach (var item in manager.ReturnToRemisePair) {
                             if (current.personsInTrain.Count == 0 && item.Value && current.startLocation == item.Key && !current.isCleaning) {
                                 Console.WriteLine("Return to remise with this train");
+                                //this works but last train doesnt go to remise for some reason
                                 manager.ReturnToRemise(current);
                                 manager.ReturnToRemisePair.Remove(item);
                                 break;
