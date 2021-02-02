@@ -14,6 +14,7 @@ namespace RailRoadSimulator
 		public Image wagonModel { get; set; }
 		public int capacity { get; set; } = 4;
 		public bool hasPath { get; set; } = false;
+		public bool isCleaning { get; set; } = false;
 		public int firstX { get; set; }
 		public int firstY { get; set; }
 		public int Xend { get; set; } = 0;

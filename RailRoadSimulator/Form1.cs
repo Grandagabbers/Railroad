@@ -281,7 +281,22 @@ namespace RailRoadSimulator
                         if (!current.hasPath) {
                             manager.GoToNextStation(current);
                         }
-
+                        if (current.personsInTrain.Count == 0 && manager.people.Count == 0) {
+                            //current.isCleaning = true;
+                            //start cleaning
+                        }
+                        foreach (var item in manager.ReturnToRemisePair) {
+                            if (current.personsInTrain.Count == 0 && item.Value && current.startLocation == item.Key && !current.isCleaning) {
+                                Console.WriteLine("Return to remise with this train");
+                                manager.ReturnToRemise(current);
+                                manager.ReturnToRemisePair.Remove(item);
+                                break;
+                            }
+                        }
+                        if (current.currentRoom.areaType.Contains("Remise")) {
+                            manager.trains.Remove(current);
+                            thingsToDraw.Remove(current);
+                        }
                     }
                 }
                 ///check if a evac is going on, if so set person.evac to true 

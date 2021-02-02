@@ -29,7 +29,7 @@ namespace RailRoadSimulator
 		public ILayout[,] coordinates { get; set; }
 		PathFinding path = new PathFinding();
 		public KeyValuePair<int, bool> Leaves { get; set; }
-		public Dictionary<char, bool> ReturnToRemisePair { get; set; }
+		public List<KeyValuePair<string, bool>> ReturnToRemisePair = new List<KeyValuePair<string, bool>>();
 		public Manager(ILayout[,] coordinates, MainForm main)
 		{
 			this.main = main;
@@ -381,28 +381,29 @@ namespace RailRoadSimulator
 				//value is null
 				Console.WriteLine("Retire Key is: " + itemKey);
 				Console.WriteLine("Retire Value is: " + itemValue);
-				TempIdentity temp = new TempIdentity();
+				//TempIdentity temp = new TempIdentity();
 
-				foreach (var item in coordinates)
-				{
-					if (item != null)
-					{
-						if (item.areaType == "Remise")
-						{
-							temp.endX = item.X;
-							temp.endY = item.Y;
-							break;
-						}
-					}
-				}
+				//foreach (var item in coordinates)
+				//{
+				//	if (item != null)
+				//	{
+				//		if (item.areaType == "Remise")
+				//		{
+				//			temp.endX = item.X;
+				//			temp.endY = item.Y;
+				//			break;
+				//		}
+				//	}
+				//}
 				//set keyvaluepair use this to determine which train has to come back to remise
-				//ReturnToRemisePair = new KeyValuePair<char, bool>(Char.Parse(itemKey), true);
+				ReturnToRemisePair.Add(new KeyValuePair<string, bool>(itemKey, true));
 
 
 			}
 		}
 		public void ReturnToRemise(Train train)
 		{
+			train.route.Clear();
 			foreach (var item in coordinates)
 			{
 				if (item != null)
@@ -415,9 +416,7 @@ namespace RailRoadSimulator
 					}
 				}
 			}
-			//if (train.hasPath == false) {
-			//	FindPath(train);
-			//}
+				FindPath(train);	
 		}
 	}
 
