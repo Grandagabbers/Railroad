@@ -101,8 +101,6 @@
       <DependentUpon>Settings.settings</DependentUpon>
       <DesignTimeSharedInput>True</DesignTimeSharedInput>
     </Compile>
-    <None Include="simple-0.trc" />
-    <None Include="simple-8.trc" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />

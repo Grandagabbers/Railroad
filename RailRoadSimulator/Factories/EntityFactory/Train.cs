@@ -12,15 +12,24 @@ namespace RailRoadSimulator
 		public char destination { get; set; }
 		public string startLocation { get; set; }
 		public Image wagonModel { get; set; }
-		public int capacity { get; set; } = 4;
+		public int capacity { get; set; } = 25;
 		public bool hasPath { get; set; } = false;
 		public bool isCleaning { get; set; } = false;
+		public bool hasBeenCleaned { get; set; } = false;
+		public bool returning { get; set; } = false;
+		public int cleanWait { get; set; } = 0;
 		public int firstX { get; set; }
 		public int firstY { get; set; }
 		public int Xend { get; set; } = 0;
 		public int Yend { get; set; } = 0;
 		public bool waitCount { get; set; } = false;
 		public int waitAmount { get; set; } = 0;
+		//list of maids in train
+
+		public List<Maid> maidsInTrain = new List<Maid>();
+		//list of persons from the train used at cleaning
+		public List<Person> peopleFromTrain { get; set; }
+		//list of all stations a train can go to
 
 		public List<string> allStations = new List<string>()
 		{
@@ -36,6 +45,7 @@ namespace RailRoadSimulator
 
 		public Train(TempIdentity temp)
 		{
+			peopleFromTrain = new List<Person>();
 			personsInTrain = new List<Person>();
 			amountOfWagons = temp.amountOfWagons;
 			areaType = temp.areaType;
@@ -47,11 +57,14 @@ namespace RailRoadSimulator
 			endY = temp.endY;
 			model = Image.FromFile(@"..\..\Assets\train.png");
 			model.RotateFlip(RotateFlipType.Rotate180FlipX);//rotate image so its correctly displayed
+			//if train has more wagons
 			if (amountOfWagons > 1)
 			{
+				//check how many wagons
 				for (int i = 0; i != amountOfWagons; i++)
 				{
-					capacity = capacity + 4;
+					//increase capacity per wagon
+					capacity = capacity + 8;
 					wagonModel = Image.FromFile(@"..\..\Assets\train.png");
 					model.RotateFlip(RotateFlipType.Rotate180FlipX);//rotate image so its correctly displayed
 				}

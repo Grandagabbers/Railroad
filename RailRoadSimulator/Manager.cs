@@ -14,36 +14,83 @@ namespace RailRoadSimulator
 {
 	public class Manager : RailroadEventListener
 	{
+		//the mainform
 		MainForm main { get; set; }
+		//variable to store the key deliverd of a dll event
 		string itemKey { get; set; }
+		//variable to store the value deliverd of a dll event
 		string itemValue { get; set; }
-		public bool evacuation { get; set; } = false;
 
+		//list of all the people that spawn
 		public List<IEntity> people = new List<IEntity>();
+		//list of all the trains that spawn
 		public List<IEntity> trains = new List<IEntity>();
 
+		//the layout of the map
 		List<string> layout = new List<string>();
 
 		EntityFactory fac = new EntityFactory();
-		LayoutFactory layFac { get; set; }
+		//the coordinates used to get location of people or trains
 		public ILayout[,] coordinates { get; set; }
+		//for pathfinding
 		PathFinding path = new PathFinding();
+		//to store if emergencyclean event is called
+		public KeyValuePair<Point, bool> emergencyClean { get; set; }
+		//to store if leaves on track event is called
 		public KeyValuePair<int, bool> Leaves { get; set; }
+		//to store if a remise event is called
 		public List<KeyValuePair<string, bool>> ReturnToRemisePair = new List<KeyValuePair<string, bool>>();
 		public Manager(ILayout[,] coordinates, MainForm main)
 		{
 			this.main = main;
 			this.coordinates = coordinates;
-
-			layFac = new LayoutFactory();
-			layFac.GenerateEntity();
+			//set the layout
 			layout = System.IO.File.ReadAllLines(@"..\..\final-assignment.trc").ToList<string>();
-
+			//start the events
 			RailroadEventManager.Register(this);
 			//To speed up for testing
-			//RailroadEventManager.RRTE_Factor = RailroadEventManager.RRTE_Factor * 4f;
+			RailroadEventManager.RRTE_Factor = RailroadEventManager.RRTE_Factor * 4f;
 		}
 
+		/// <summary>
+		/// Starts the cleaning at the train and adds maid to the train
+		/// </summary>
+		/// <param name="current"></param>
+		public void StartCleaning(Train current)
+		{
+			current.peopleFromTrain = new List<Person>();
+
+			foreach (var person in current.personsInTrain.ToList()) {
+				current.peopleFromTrain.Add(person);
+				current.personsInTrain.Remove(person);
+			}
+
+			TempIdentity temp = new TempIdentity();
+			temp.X = current.X;
+			temp.Y = current.Y;
+			temp.currentRoom = current.currentRoom;
+			temp.areaType = "Maid";
+			//create maid
+			people.Add((Maid)fac.GetPerson("Maid", temp));
+			//add maid to train
+			current.maidsInTrain.Add((Maid)people.Last());
+
+		}
+
+		public void AddPeopleBack(Train current)
+		{
+			//remove maid from train
+			current.maidsInTrain.RemoveAt(0);
+			//add people back to the train
+			foreach (var person in current.peopleFromTrain.ToList()) {
+				current.personsInTrain.Add(person);
+			}
+		}
+
+		/// <summary>
+		/// this method finds the next path of the train 
+		/// </summary>
+		/// <param name="current">the train that needs a path</param>
 		public void FindPath(Train current)
 		{
 			//THESE LINES DETERMINE THE PATH BASED ON THE PEOPLE IN THE TRAIN
@@ -69,15 +116,20 @@ namespace RailRoadSimulator
 			//	current.endY = keyOfMaxValue.Y;
 			//}
 
-			//make the endTile of the train
-			//Tile endTile = new Tile();
-			//endTile.X = current.endX;
-			//endTile.Y = current.endY;
-
+			//find the path the train has to go using the layout of the map and the train
 			List<Tile> trainPath = path.findTiles(layout, current);
+			//train now has a path
 			current.hasPath = true;
+			//add to the eventqueue
+			current.eventQueue.AddLast(trainPath);
+			//set the route of the train
+			current.route = trainPath;
+			//remove the queue
+			current.eventQueue.RemoveLast();
 
+			//search the next station the train has to go to
 			current.NextStation(current);
+			//loop through coordinates to set the next end coordinates
 			foreach (var item in coordinates) {
 				if (item != null)
 				{
@@ -91,9 +143,7 @@ namespace RailRoadSimulator
 					}
 				}
 			}
-			current.eventQueue.AddLast(trainPath);
-			current.route = trainPath;
-			current.eventQueue.RemoveLast();
+
 		}
 
 		/// <summary>
@@ -123,7 +173,7 @@ namespace RailRoadSimulator
 						//if person endloc is same as train endloc check in, else not
 						//if (checkedIn)
 						//{
-							Console.WriteLine("Person checked in");
+							//Console.WriteLine("Person checked in");
 							train.personsInTrain.Add((Person)person);
 							//remove people because they are now in train
 							people.Remove(person);
@@ -131,55 +181,46 @@ namespace RailRoadSimulator
 					}
 				}
 			}
-			//if there are people in the train find the route the most people need to go to
+			//if the train does not have a path find a path
 			if (!train.hasPath)
 			{
 				train.routeCounter = 0;
 				FindPath(train);
 			}
-			//this does not work currently
-			//else if (train.routeCounter == 0 || train.route == null && train.endX != train.X && train.endY != train.Y)
-			//{
-			//	foreach (var item in coordinates)
-			//	{
-			//		if (item != null && item.areaType == "Station" && item.whatIsIt == train.destination)
-			//		{
-			//			train.endX = item.X;
-			//			train.endY = item.Y;
-			//		}
-			//	}
-			//	//find path to end destination if there is no route
-			//	FindPath(train);
-			//}
-
 		}
-			public void CheckOutPeople(Train train)
+		/// <summary>
+		/// Checks out the people if they are at their station
+		/// </summary>
+		/// <param name="train"></param>
+		public void CheckOutPeople(Train train)
 		{
+			//loops through the people in the train to check if they are at their station
 			foreach (var person in train.personsInTrain.ToList())
 			{
 				//if position is correct remove people from train because they are at their location
 				if (person.endX == train.X && person.endY == train.Y)
 				{
 					train.personsInTrain.Remove(person);
-					Console.WriteLine("Person checked out");
+					//Console.WriteLine("Person checked out");
 				}
 			}
 		}
 
-		public void AddMaid(Train train)
-		{
-			foreach (var person in train.personsInTrain.ToList())
-			{
-				//if position is correct remove people from train because they are at their location
-				if (person.endX == train.X && person.endY == train.Y)
-				{
-					if (train.capacity < 1)
-					{
-						//people.Add((Maid)fac.GetPerson("Person", temp));
-					}
-				}
-			}
-		}
+
+		//public void AddMaid(Train train)
+		//{
+		//	foreach (var person in train.personsInTrain.ToList())
+		//	{
+		//		//if position is correct remove people from train because they are at their location
+		//		if (person.endX == train.X && person.endY == train.Y)
+		//		{
+		//			if (train.capacity < 1)
+		//			{
+		//				//people.Add((Maid)fac.GetPerson("Person", temp));
+		//			}
+		//		}
+		//	}
+		//}
 
 
 		//Adapter pattern
@@ -258,17 +299,6 @@ namespace RailRoadSimulator
 
 				temp.areaType = "Person";
 
-				if (itemKey.Last() != itemValue.Last()) {
-
-				//	//look for start loc
-				//	temp.Y = layout.FindIndex(x => x.Contains(itemKey.Last()));
-				//	temp.X = layout[temp.Y].IndexOf(itemKey.Last());
-
-				//	//look for end loc
-				//temp.endY = layout.FindIndex(x => x.Contains(itemValue.Last()));
-				//temp.endX = layout[temp.endY].IndexOf(itemValue.Last());
-				//temp.endStationName = itemValue.Last();
-				}
 				//check if begin and end is not the same
 				if (itemKey.Last() != itemValue.Last())
 				{
@@ -306,12 +336,13 @@ namespace RailRoadSimulator
 			else if (evt.EventType == RailroadEventType.CLEANING_EMERGENCY)
 			{
 				//clean everything, so create maids
-				//Console.WriteLine("Cleaning emergency Key is: " + itemKey);
-				//Console.WriteLine("Cleaning emergency Value is: " + itemValue);
+				Console.WriteLine("Cleaning emergency Key is: " + itemKey);
+				Console.WriteLine("Cleaning emergency Value is: " + itemValue);
 
 				TempIdentity temp = new TempIdentity();
 				temp.areaType = "Maid";
 
+				////find the coordinates the maid has to be spawned at
 				foreach (var item in coordinates)
 				{
 					if (item != null)
@@ -325,26 +356,12 @@ namespace RailRoadSimulator
 								break;
 							}
 						}
-						//if (temp.endX != item.X || temp.endY != item.Y)
-						//{
-						//	if (item.areaType == "Station" && item.whatIsIt == itemValue.Last())
-						//	{
-						//		temp.endX = item.X;
-						//		temp.endY = item.Y;
-						//		temp.endStationName = itemValue.Last();
-						//		if (trains.Capacity <= 1)
-						//		{
-						//			//Spawn a Maid
-						//			people.Add((Maid)fac.GetPerson("Person", temp));
-						//		}
-						//	}
-						//}
-					}					
+					}
 				}
-
+				Point point = new Point(temp.X, temp.Y);
+				emergencyClean = new KeyValuePair<Point, bool>(point, true);
 				//add the maid to the people list
-				people.Add((Maid)fac.GetPerson("Maid", temp));
-				//Console.WriteLine("Maid spawned at loc: " + itemValue);
+				//people.Add((Maid)fac.GetPerson("Maid", temp));
 
 			}
 			else if (evt.EventType == RailroadEventType.LEAVES_ON_TRACK)
