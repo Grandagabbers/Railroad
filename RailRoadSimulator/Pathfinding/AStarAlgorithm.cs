@@ -30,7 +30,7 @@ namespace RailRoadSimulator.Pathfinding
 			finalList = new List<Tile>();
 			list = new List<string>();
 
-			
+			//start of checking if track is dubbeltrack and if its occupied, later can be used to improve pathfinding
 			foreach (var item in fac.layout)
 			{
 				if (!item.isOccupied && item.isDubbelTrack)
@@ -47,6 +47,7 @@ namespace RailRoadSimulator.Pathfinding
 			start.X = train.X;
 			start.Y = train.Y;
 
+			//this can be used if wanting to use the maplayout instead of the tiles from the train
 			//start.Y = map.FindIndex(x => x.Contains(train.startLocation));
 			//start.X = map[start.Y].IndexOf(train.startLocation);
 
@@ -55,11 +56,13 @@ namespace RailRoadSimulator.Pathfinding
 			finish.X = train.endX;
 			finish.Y = train.endY;
 
+			//this can be used if wanting to use the maplayout instead of the tiles from the train
 			//finish.Y = map.FindIndex(x => x.Contains(train.destination));
 			//finish.X = map[finish.Y].IndexOf(train.destination);
 
 			start.SetDistance(finish.X, finish.Y);
 
+			//make lists to check the tiles
 			var activeTiles = new List<Tile>();
 			activeTiles.Add(start);
 			var visitedTiles = new List<Tile>();

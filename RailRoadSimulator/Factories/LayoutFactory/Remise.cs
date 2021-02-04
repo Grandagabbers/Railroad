@@ -9,10 +9,8 @@ namespace RailRoadSimulator
 {
 	public class Remise : ILayout
 	{
-		public List<Train> trainsInStorage { get; set; }
 		public Remise(Tile temp)
 		{
-			trainsInStorage = new List<Train>();
 			areaType = temp.areaType;
 			X = temp.X;
 			Y = temp.Y;
@@ -20,5 +18,6 @@ namespace RailRoadSimulator
 			model.RotateFlip(RotateFlipType.Rotate180FlipX);//rotate image so its correctly displayed
 
 		}
+
 	}
 }

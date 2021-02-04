@@ -12,7 +12,7 @@ namespace RailRoadSimulator
 		public char destination { get; set; }
 		public string startLocation { get; set; }
 		public Image wagonModel { get; set; }
-		public int capacity { get; set; } = 25;
+		public int capacity { get; set; } = 8;
 		public bool hasPath { get; set; } = false;
 		public bool isCleaning { get; set; } = false;
 		public bool hasBeenCleaned { get; set; } = false;

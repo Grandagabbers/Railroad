@@ -16,7 +16,7 @@ namespace RailRoadSimulator
 		}
 
         /// <summary>
-        /// Draw the layout of the hotel
+        /// Draw the layout of the railroad
         /// </summary>
         /// <param name="coordinates">layout of the game</param>
         /// <returns>bitmap with the layout</returns>

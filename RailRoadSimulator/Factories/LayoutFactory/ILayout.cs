@@ -28,10 +28,10 @@ namespace RailRoadSimulator
 		}
 
 		/// <summary>
-		/// Draw the room on the bitmap
+		/// Draw the item on the bitmap
 		/// </summary>
 		/// <param name="layout">bitmap to draw on</param>
-		/// <returns>bitmap with the room drawn on it</returns>
+		/// <returns>bitmap with the item drawn on it</returns>
 		public Bitmap Draw(Bitmap layout, int size)
 		{
 

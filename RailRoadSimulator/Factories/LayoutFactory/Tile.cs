@@ -14,15 +14,6 @@ namespace RailRoadSimulator
 		{
 			this.Distance = Math.Abs(targetX - X) + Math.Abs(targetY - Y);
 		}
-		//list to check all rideable tiles for testing
-	//	public List<char> rideableTracks = new List<char>{
-	//	 '╔', '╦', '╫',
-	//	 '╩', '╝', '╚',
-	//	 '╟', '╢', '╚',
-	//	 '╗', '└', '┌', '┐',
-	//	 '║', '═', '─', '┘',
-	//	 //Stations 'A', 'B', 'C', 'D', 'E', 'Remise', 
-	//};
 		
 		//List with all dubbelTracks used to set isdubbeltrack
 		public List<char> dubbelTrack = new List<char>

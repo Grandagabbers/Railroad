@@ -51,11 +51,11 @@ namespace RailRoadSimulator
         }
 
         /// <summary>
-        /// Draws the person inside of the room he is in.
+        /// Draws the person on the layout.
         /// </summary>
         /// <param name="person">The sprite of the person that is about to be drawn.</param>
-        /// <param name="sizeRoom">Need this int to make the character the size of the room so if you change it they change with the it.</param>
-        /// <returns>The sprite of the right person in the right room.</returns>
+        /// <param name="sizeRoom">Need this int to make the character the size of the item so if you change it they change with the it.</param>
+        /// <returns>The sprite of the right person.</returns>
         public Bitmap DrawPerson(Bitmap person, int sizeRoom)
         {
 

@@ -13,9 +13,13 @@ namespace RailRoadSimulator
 {
 	public class LayoutFactory : AbstractFactory
 	{
+        //list of layout
 		public List<ILayout> layout = new List<ILayout>();
+        //list of finalstring layout
         public List<string> finalLay = new List<string>();
+        //list of alltiles
         public List<Tile> allTiles = new List<Tile>();
+        //2d array with all coordinates
         public ILayout[,] coordinates { get; set; }
         public void GenerateEntity()
 		{
@@ -30,14 +34,14 @@ namespace RailRoadSimulator
         }
 
         /// <summary>
-        /// read out the json layout file and save it in a temporary list with temporary rooms
+        /// read out the trc layout file and save it in a temporary list with temporary layout
         /// </summary>
         private void DeserializeLayout()
         {
-            //var json = File.ReadAllLines(@"..\..\final-assignment.trc");
             finalLay = File.ReadAllLines(@"..\..\final-assignment.trc").ToList();
 
             int y = 0;
+            //foreach loops to check what the layout has
             foreach (var singleLine in finalLay)
             {
                 int x = 0;
@@ -88,8 +92,6 @@ namespace RailRoadSimulator
                 }
                 y++;
             }
-			//convert json to templayout
-			//tempRooms = JsonConvert.DeserializeObject<List<TempLayout>>(json);
 		}
 
         /// <summary>
@@ -113,7 +115,7 @@ namespace RailRoadSimulator
             //search the namespace/current assembly for all types that are available
             //make a list out of all the types and look if one of those types contain the name of the areatype
             //if so set that type and create an instance of it.
-            //if not, return the temp room.
+            //if not, return the temp layout.
             else
             {
                 string nspace = "RailRoadSimulator";

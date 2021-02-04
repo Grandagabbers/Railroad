@@ -14,11 +14,14 @@ namespace RailRoadSimulator
 {
 	public partial class MainForm : Form
 	{
+        //timers used to tick for event updates
 		public Timer timer { get; } = new Timer();
         private Timer timerForMaids { get; } = new Timer();
         private Timer slowTimer { get; } = new Timer();
         private int timerTickCount { get; set; }
+        //bool for to slow the game
         private bool slowBool { get; set; } = false;
+        //amount to check how long a train has been waiting
         private int amount { get; set; } = 0;
 
         //background where to draw the layout on
@@ -30,18 +33,19 @@ namespace RailRoadSimulator
         private Draw draw = new Draw();
         private LayoutFactory fac = new LayoutFactory();
 
+        //lists of things to draw
         public List<IEntity> thingsToDraw = new List<IEntity>();
         public List<IEntity> newPeople = new List<IEntity>();
-        //private Factory
 
+        //for the cleanlocation of where to clean
         private Point cleanLoc { get; set; }
 
 
 		public MainForm()
 		{
 			//set the tick frequency
-			timer.Interval = 50;
-            timerForMaids.Interval = 50;
+			timer.Interval = 250;
+            timerForMaids.Interval = 250;
             slowTimer.Enabled = false;
             fac.GenerateEntity();
             manager = new Manager(fac.coordinates, this);
@@ -151,6 +155,7 @@ namespace RailRoadSimulator
                                 if (train.waitCount) {
                                     train.waitAmount++;
                                 }
+                                //let the train wait 5 ticks so people can check in and out
                                 if (train.waitAmount == 5)
                                 {
                                     //Console.WriteLine("Train has waited 5 ticks");
@@ -168,7 +173,8 @@ namespace RailRoadSimulator
                     {
                         train.cleanWait++;
                     }
-                    if (train.cleanWait == 20)
+                    //cleaning takes 30 ticks
+                    if (train.cleanWait == 30)
                     {
                         train.isCleaning = false;
                         train.cleanWait = 0;
@@ -282,12 +288,11 @@ namespace RailRoadSimulator
                         foreach (var item in manager.ReturnToRemisePair) {
                             if (current.personsInTrain.Count == 0 && item.Value && !current.isCleaning && !current.returning && current.startLocation == item.Key)// && current.currentRoom.Parent.whatIsIt.ToString() == item.Key &&) 
                             {
-                                    current.returning = true;
-                                    Console.WriteLine("Return to remise with this train");
-                                    //this works but last train doesnt go to remise for some reason
-                                    manager.ReturnToRemise(current);
-                                    manager.ReturnToRemisePair.Remove(item);
-                                    break;
+                                current.returning = true;
+                                Console.WriteLine("Return to remise with this train");
+                                manager.ReturnToRemise(current);
+                                manager.ReturnToRemisePair.Remove(item);
+                                break;
                             }
                         }
 
@@ -295,82 +300,7 @@ namespace RailRoadSimulator
                 }
 
             }
-            //if (manager.evacuation == true) // if evac is started
-            //{
-
-            //    if (manager.hotelEmpty == false)
-            //    {
-            //        //query to check if all persons are in the lobby
-            //        var amount = from person in manager.people.Keys
-            //                     where person.position != new Point(1, 0)
-            //                     select person;
-            //        List<IPerson> check = amount.ToList<IPerson>();
-
-            //        //if all are in lobby start the event
-            //        if (check.Count == 0)
-            //        {
-            //            manager.hotelEmpty = true;
-            //            foreach (IPerson person in manager.people.Keys)
-            //            {
-            //                person.eventStarted = true;
-            //                person.timeBusyEvent = timerTickCount;
-            //            }
-            //        }
-            //    }
-
-            //    ///foreach person check if the evac is over
-            //    ///if yes, continue where they left off.
-            //    foreach (IPerson person in manager.people.Keys)
-            //    {
-            //        if (manager.evacuation == true && manager.hotelEmpty == true && person.checkedIn == true)
-            //        {
-            //            //check if evac is over
-            //            if (timerTickCount - person.timeBusyEvent >= 250)//check if waitingt time is over, if so return to rooms
-            //            {
-            //                //check if the last person in the loop, if yes stop the evac
-            //                if (last == person)
-            //                {
-            //                    manager.evacuation = false;
-            //                }
-
-            //                person.evac = false;
-            //                //remove the evac event from eventqueue
-            //                if (person.eventQueue.Count > 0)
-            //                {
-            //                    person.eventQueue.RemoveFirst();
-            //                }
-
-            //                //find path to event that the person was doing before the evac
-            //                if (person.eventQueue.Count > 0 && person.eventQueue.FirstOrDefault().Count > 2)
-            //                {
-            //                    int x = person.eventQueue.First().Last().position.X;
-            //                    int y = person.eventQueue.First().Last().position.Y;
-            //                    IRoom end = roomFactory.coordinates[x, y];
-            //                    person.eventQueue.RemoveFirst();
-            //                    if (end.position != new Point(1, 0))
-            //                    {
-
-            //                        manager.FindPathEvacuation(person.currentRoom, end, person, false);
-            //                        person.SavePath(person.eventQueue.First());
-            //                    }
-
-            //                }
-            //                ///if the person had no events.
-            //                ///customer returns to room.
-            //                ///maid stays in lobby
-            //                else if (person.room.position != new Point(1, 0))
-            //                {
-            //                    manager.FindPathEvacuation(person.currentRoom, person.room, person, false);
-
-            //                    person.SavePath(person.eventQueue.First());
-
-            //                }
-            //            }
-            //        }
-
-
-            //    }
-            //}
+       
             foreach (IEntity person in manager.trains)// if a event hasnt started, set timertickcount equal to person time.
             {
 

@@ -49,7 +49,7 @@ namespace RailRoadSimulator
 			//start the events
 			RailroadEventManager.Register(this);
 			//To speed up for testing
-			RailroadEventManager.RRTE_Factor = RailroadEventManager.RRTE_Factor * 4f;
+			RailroadEventManager.RRTE_Factor = RailroadEventManager.RRTE_Factor * 3f;
 		}
 
 		/// <summary>
@@ -60,7 +60,8 @@ namespace RailRoadSimulator
 		{
 			current.peopleFromTrain = new List<Person>();
 
-			foreach (var person in current.personsInTrain.ToList()) {
+			foreach (var person in current.personsInTrain.ToList())
+			{
 				current.peopleFromTrain.Add(person);
 				current.personsInTrain.Remove(person);
 			}
@@ -82,7 +83,8 @@ namespace RailRoadSimulator
 			//remove maid from train
 			current.maidsInTrain.RemoveAt(0);
 			//add people back to the train
-			foreach (var person in current.peopleFromTrain.ToList()) {
+			foreach (var person in current.peopleFromTrain.ToList())
+			{
 				current.personsInTrain.Add(person);
 			}
 		}
@@ -130,7 +132,8 @@ namespace RailRoadSimulator
 			//search the next station the train has to go to
 			current.NextStation(current);
 			//loop through coordinates to set the next end coordinates
-			foreach (var item in coordinates) {
+			foreach (var item in coordinates)
+			{
 				if (item != null)
 				{
 					if (current.endX != item.X || current.endY != item.Y)
@@ -152,18 +155,25 @@ namespace RailRoadSimulator
 		/// <param name="train"></param>
 		public void GoToNextStation(Train train)
 		{
-			if (!train.hasPath) {
+			if (!train.hasPath)
+			{
 				train.routeCounter = 0;
 				FindPath(train);
 			}
 		}
 
+		/// <summary>
+		/// checks if people are at the station of the train, if so check them in
+		/// also a checkin function if people want to only get in if endloc is the same, but not working now since pathfinding has changed to a more realistic way
+		/// </summary>
+		/// <param name="train">current train</param>
 		public void CheckIfPeopleAtStation(Train train)
 		{
 			//make function that people get in even if it is not their endstation
 
 			//check if train is not full
-			if (train.personsInTrain.Count < train.capacity) {
+			if (train.personsInTrain.Count < train.capacity)
+			{
 				foreach (var person in people.ToList())
 				{
 					if (person.areaType.Contains("Person") && train.X == person.X && train.Y == person.Y)
@@ -173,10 +183,10 @@ namespace RailRoadSimulator
 						//if person endloc is same as train endloc check in, else not
 						//if (checkedIn)
 						//{
-							//Console.WriteLine("Person checked in");
-							train.personsInTrain.Add((Person)person);
-							//remove people because they are now in train
-							people.Remove(person);
+						//Console.WriteLine("Person checked in");
+						train.personsInTrain.Add((Person)person);
+						//remove people because they are now in train
+						people.Remove(person);
 						//}
 					}
 				}
@@ -207,23 +217,7 @@ namespace RailRoadSimulator
 		}
 
 
-		//public void AddMaid(Train train)
-		//{
-		//	foreach (var person in train.personsInTrain.ToList())
-		//	{
-		//		//if position is correct remove people from train because they are at their location
-		//		if (person.endX == train.X && person.endY == train.Y)
-		//		{
-		//			if (train.capacity < 1)
-		//			{
-		//				//people.Add((Maid)fac.GetPerson("Person", temp));
-		//			}
-		//		}
-		//	}
-		//}
-
-
-		//Adapter pattern
+		//events are fired get here
 		public void Notify(RailroadEvent evt)
 		{
 
@@ -358,15 +352,13 @@ namespace RailRoadSimulator
 						}
 					}
 				}
+				//make the point of the emergency and add it to the keyvaluepair
 				Point point = new Point(temp.X, temp.Y);
 				emergencyClean = new KeyValuePair<Point, bool>(point, true);
-				//add the maid to the people list
-				//people.Add((Maid)fac.GetPerson("Maid", temp));
 
 			}
 			else if (evt.EventType == RailroadEventType.LEAVES_ON_TRACK)
 			{
-			
 				//Slow down RRTE factor by half
 				//Key is duration
 				//Value is how many seconds and then normal again
@@ -403,6 +395,10 @@ namespace RailRoadSimulator
 
 			}
 		}
+		/// <summary>
+		/// Finds the route back to the remise
+		/// </summary>
+		/// <param name="train">current train</param>
 		public void ReturnToRemise(Train train)
 		{
 			train.route.Clear();
@@ -422,70 +418,5 @@ namespace RailRoadSimulator
 			FindPath(train);
 		}
 	}
-
-		/// <summary>
-		/// Look for every room what the neighbours are 
-		/// and store them
-		/// </summary>
-		/// <param name="coordinates">All the room coordinates.</param>
-		//public void CreateGraph(ILayout[,] coordinates)
-		//{
-		//	this.coordinates = coordinates;
-
-		//	//This only gives neighbours on left and right, still have to make function for top and bottom
-		//	foreach (ILayout lay in coordinates)
-		//	{
-
-		//		if (lay != null)
-		//		{
-		//			lay.neighbours.Clear();
-		//			int left = lay.position.X - 1;
-		//			int right = lay.position.X + 1;
-		//			int top = lay.position.Y + 1;
-		//			int bottom = lay.position.Y - 1;
-		//			while (left >= 0 && coordinates[left, lay.position.Y] == null)
-		//			{
-		//				left--;
-		//			}
-		//			while (right < coordinates.GetLength(0) && coordinates[right, lay.position.Y] == null)
-		//			{
-		//				right++;
-		//			}
-		//			while (top < coordinates.GetLength(1) && coordinates[lay.position.X, top] == null)
-		//			{
-		//				top++;
-		//			}
-		//			while (bottom >= 0 && coordinates[lay.position.X, bottom] == null)
-		//			{
-		//				bottom++;
-		//			}
-		//			//if (top < coordinates.GetLength(1) && coordinates[lay.position.X, top] != null)
-		//			//{
-		//			//	ILayout Top = coordinates[lay.position.X, top];
-		//			//	lay.neighbours.Add(Top, 1);
-		//			//}
-		//			//if (bottom >= 0 && coordinates[lay.position.X, bottom] != null)
-		//			//{
-		//			//	ILayout Bottom = coordinates[lay.position.X, bottom];
-		//			//	lay.neighbours.Add(Bottom, 1);
-		//			//}
-		//			if (left >= 0 && coordinates[left, lay.position.Y] != null)
-		//			{
-		//				ILayout Left = coordinates[left, lay.position.Y];
-		//				lay.neighbours.Add(Left, 1);
-		//			}
-		//			if (right < coordinates.GetLength(0) && coordinates[right, lay.position.Y] != null)
-		//			{
-		//				ILayout Right = coordinates[right, lay.position.Y];
-		//				lay.neighbours.Add(Right, 1);
-		//			}
-		//			foreach (var a in lay.neighbours)
-		//			{
-		//				Console.WriteLine("LayoutItem: " + lay.id + " Has neighbours: " + a.Key.id + " amount of neighbours= " + lay.neighbours.Count);
-		//			}
-		//		}
-		//	}
-
-		//}
-	}
+}
 

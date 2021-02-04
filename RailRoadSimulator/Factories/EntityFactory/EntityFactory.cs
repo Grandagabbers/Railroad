@@ -14,11 +14,11 @@ namespace RailRoadSimulator
 		}
 
         /// <summary>
-        /// Makes a person and based on the variables it will be either a maid or a customer.
+        /// Makes a person and based on the variables it will be either a maid or a person.
         /// </summary>
         /// <param name="product">What person it's gonna be.</param>
         /// <param name="tempPerson">The temperory variables for the person that is about to be created.</param>
-        /// <returns>Either a maid or a customer.</returns>
+        /// <returns>Either a maid or a person.</returns>
         public IEntity GetPerson(string product, TempIdentity tempPerson)
         {
             Type type = Type.GetType(product);
