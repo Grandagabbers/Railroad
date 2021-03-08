@@ -5,17 +5,21 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace RailRoadSimulator.Factories.LayoutFactory
+namespace RailRoadSimulator
 {
 	public class Track : ILayout
 	{
-		public Track(TempLayout temp)
+		public Track(Tile temp)
 		{
 			areaType = temp.areaType;
-			position = temp.position;
+			X = temp.X;
+			Y = temp.Y;
 			model = Image.FromFile(@"..\..\Assets\track.png");
+			whatIsIt = temp.whatIsIt;
+			if (whatIsIt == '═' || whatIsIt == '─') { 
+				model.RotateFlip(RotateFlipType.Rotate90FlipX);//rotate image so its correctly displayed
+			}
 			model.RotateFlip(RotateFlipType.Rotate180FlipX);//rotate image so its correctly displayed
-			id = temp.id;
 		}
 	}
 }

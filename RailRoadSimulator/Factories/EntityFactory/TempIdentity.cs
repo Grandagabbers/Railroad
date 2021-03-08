@@ -5,10 +5,13 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Drawing.Railway
+namespace RailRoadSimulator
 {
-    public abstract class IRailway
-    {
-        public Image model { get; set; }
-    }
+	public class TempIdentity : IEntity
+	{
+		public TempIdentity()
+		{
+
+		}
+	}
 }

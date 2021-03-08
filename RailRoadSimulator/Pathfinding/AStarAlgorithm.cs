@@ -1,6 +1,7 @@
-﻿using RailRoadSimulator.Factories.LayoutFactory;
+﻿using Microsoft.SqlServer.Server;
 using System;
 using System.Collections.Generic;
+using System.Drawing;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -11,34 +12,64 @@ namespace RailRoadSimulator.Pathfinding
 	public class PathFinding
 	{
 		//final list to go
-		List<Tile> finalList = new List<Tile>();
-
+		List<Tile> finalList;
+		LayoutFactory fac = new LayoutFactory();
+		public List<string> list { get; set; }
+		public PathFinding()
+		{
+			fac.GenerateEntity();
+		}
 		/// <summary>
 		/// This finds the path
 		/// </summary>
 		/// <param name="map">the layout of the map</param>
-		/// <param name="startLoc">startlocation</param>
+		/// <param name="train">startlocation</param>
 		/// <param name="endLoc">endlocation</param>
-		public void findTiles(List<string> map, char startLoc, char endLoc)
+		public List<Tile> findTiles(List<string> map, Train train)
 		{
+			finalList = new List<Tile>();
+			list = new List<string>();
+
+			//start of checking if track is dubbeltrack and if its occupied, later can be used to improve pathfinding
+			foreach (var item in fac.layout)
+			{
+				if (!item.isOccupied && item.isDubbelTrack)
+				{
+					list.Add(item.whatIsIt.ToString());
+				}
+			}
+
+			//MAKE A LIST with List<string> innnit and a bool isoccupied and bool isdubbeltrack
+			//Use this to set all the isoccupied at each specific item
+
 			//This gets the start coordinates of the train
 			var start = new Tile();
-			start.Y = map.FindIndex(x => x.Contains(startLoc));
-			start.X = map[start.Y].IndexOf(startLoc);
+			start.X = train.X;
+			start.Y = train.Y;
+
+			//this can be used if wanting to use the maplayout instead of the tiles from the train
+			//start.Y = map.FindIndex(x => x.Contains(train.startLocation));
+			//start.X = map[start.Y].IndexOf(train.startLocation);
 
 			//This gets the end coordinates of the train
 			var finish = new Tile();
-			finish.Y = map.FindIndex(x => x.Contains(endLoc));
-			finish.X = map[finish.Y].IndexOf(endLoc);
+			finish.X = train.endX;
+			finish.Y = train.endY;
+
+			//this can be used if wanting to use the maplayout instead of the tiles from the train
+			//finish.Y = map.FindIndex(x => x.Contains(train.destination));
+			//finish.X = map[finish.Y].IndexOf(train.destination);
 
 			start.SetDistance(finish.X, finish.Y);
 
+			//make lists to check the tiles
 			var activeTiles = new List<Tile>();
 			activeTiles.Add(start);
 			var visitedTiles = new List<Tile>();
 
 			while (activeTiles.Any())
 			{
+				//CHeck here if tile isoccupied and is not dubbeltrack
 				var checkTile = activeTiles.OrderBy(x => x.CostDistance).First();
 
 				if (checkTile.X == finish.X && checkTile.Y == finish.Y)
@@ -46,27 +77,38 @@ namespace RailRoadSimulator.Pathfinding
 					//We found the destination and we can be sure (Because the the OrderBy above)
 					//That it's the most low cost option. 
 					var tile = checkTile;
-					Console.WriteLine("Retracing steps backwards...");
+					//Console.WriteLine("Retracing steps backwards...");
 					while (true)
 					{
-						Console.WriteLine($"{tile.X} : {tile.Y}");
-						if (map[tile.Y][tile.X] != startLoc || map[tile.Y][tile.X] != ' ' || map[tile.Y][tile.X] != endLoc)
+						//Console.WriteLine($"{tile.X} : {tile.Y}");
+						if (map[tile.Y][tile.X] != start.whatIsIt || map[tile.Y][tile.X] != ' ' || map[tile.Y][tile.X] != finish.whatIsIt)
 						{
 							//convert the tiles with their coordinates to the right path
 							var newMapRow = map[tile.Y].ToCharArray();
 							newMapRow[tile.X] = '*';
 							map[tile.Y] = new string(newMapRow);
 						}
+						//set isOccupied to true because this path will now be occupied
+						tile.isOccupied = true;
 						finalList.Add(tile);
 						tile = tile.Parent;
 						if (tile == null)
 						{
 							//reverse the final list to ensure it is from the start to the end 
 							finalList.Reverse();
-							Console.WriteLine("Map looks like :");
-							map.ForEach(x => Console.WriteLine(x));
-							Console.WriteLine("Done!");
-							return;
+							Console.WriteLine("Train has path, will go to " + finish.X.ToString() + finish.Y.ToString());
+							//map.ForEach(x => Console.WriteLine(x));
+
+							//foreach (var item in finalList.ToList()) {
+							//	foreach (var list in fac.layout.ToList()) {
+							//		if (list.X == item.X && list.Y == item.Y) {
+							//			fac.layout.Remove(list);
+							//			fac.layout.Add(item);
+							//		}
+							//	}
+							//}
+
+							return finalList;
 						}
 					}
 				}
@@ -74,9 +116,11 @@ namespace RailRoadSimulator.Pathfinding
 				visitedTiles.Add(checkTile);
 				activeTiles.Remove(checkTile);
 
-				var walkableTiles = GetWalkableTiles(map, checkTile, finish, endLoc);
 
-				foreach (var walkableTile in walkableTiles)
+
+				var walkableTiles = GetWalkableTiles(map, checkTile, finish);
+
+				foreach (var walkableTile in walkableTiles.ToList())
 				{
 					//We have already visited this tile so we don't need to do so again!
 					if (visitedTiles.Any(x => x.X == walkableTile.X && x.Y == walkableTile.Y))
@@ -99,9 +143,8 @@ namespace RailRoadSimulator.Pathfinding
 					}
 				}
 			}
-
 			Console.WriteLine("No Path Found!");
-
+			return null;
 
 		}
 		/// <summary>
@@ -112,12 +155,13 @@ namespace RailRoadSimulator.Pathfinding
 		/// <param name="targetTile">target tile to go to</param>
 		/// <param name="endLoc">end location</param>
 		/// <returns>next possible tiles in a list</returns>
-		private static List<Tile> GetWalkableTiles(List<string> map, Tile currentTile, Tile targetTile, char endLoc)
+		private static List<Tile> GetWalkableTiles(List<string> map, Tile currentTile, Tile targetTile)
 		{
+			
 			var possibleTiles = new List<Tile>()
 			{
 				new Tile { X = currentTile.X, Y = currentTile.Y - 1, Parent = currentTile, Cost = currentTile.Cost + 1 },
-				new Tile { X = currentTile.X, Y = currentTile.Y + 1, Parent = currentTile, Cost = currentTile.Cost + 1},
+				new Tile { X = currentTile.X, Y = currentTile.Y + 1, Parent = currentTile, Cost = currentTile.Cost + 1 },
 				new Tile { X = currentTile.X - 1, Y = currentTile.Y, Parent = currentTile, Cost = currentTile.Cost + 1 },
 				new Tile { X = currentTile.X + 1, Y = currentTile.Y, Parent = currentTile, Cost = currentTile.Cost + 1 },
 			};

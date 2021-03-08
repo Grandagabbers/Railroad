@@ -7,16 +7,17 @@ using System.Threading.Tasks;
 
 namespace RailRoadSimulator
 {
-	public class Station : ILayout
+	public class Remise : ILayout
 	{
-		public Station(Tile temp)
+		public Remise(Tile temp)
 		{
 			areaType = temp.areaType;
 			X = temp.X;
 			Y = temp.Y;
 			model = Image.FromFile(@"..\..\Assets\station.png");
-			whatIsIt = temp.whatIsIt;
 			model.RotateFlip(RotateFlipType.Rotate180FlipX);//rotate image so its correctly displayed
+
 		}
+
 	}
 }

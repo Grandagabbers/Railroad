@@ -9,68 +9,89 @@ using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace RailRoadSimulator.Factories.LayoutFactory
+namespace RailRoadSimulator
 {
 	public class LayoutFactory : AbstractFactory
 	{
-		//Temporary list of layout
-		public List<TempLayout> tempRooms = new List<TempLayout>();
+        //list of layout
 		public List<ILayout> layout = new List<ILayout>();
-        public List<String> finalLay = new List<String>();
+        //list of finalstring layout
+        public List<string> finalLay = new List<string>();
+        //list of alltiles
         public List<Tile> allTiles = new List<Tile>();
-        PathFinding path = new PathFinding();
-        //public Elevator elevator;
+        //2d array with all coordinates
         public ILayout[,] coordinates { get; set; }
         public void GenerateEntity()
 		{
 			DeserializeLayout();
 
-			//foreach temproom create a definite room
-			//add definite room to the room list
-			foreach (TempLayout temp in tempRooms)
-			{
+            //add to layout every tile
+            foreach (Tile tile in allTiles) {
+                layout.Add(GenerateRoom<ILayout>(tile.areaType, tile));
+            }
 
-				if (temp.areaType != null)
-				{
-					layout.Add(GenerateRoom<ILayout>(temp.areaType, temp));
-				}
-			}
-
-            CreateOverview();
+           CreateOverview();
         }
 
-		/// <summary>
-		/// read out the json layout file and save it in a temporary list with temporary rooms
-		/// </summary>
-		private void DeserializeLayout()
-		{
-            //var json = File.ReadAllLines(@"..\..\final-assignment.trc");
-            finalLay = File.ReadAllLines(@"..\..\simple-8.trc").ToList();
-            foreach (var singleLine in finalLay) {
-                foreach (var singleChar in singleLine) {
+        /// <summary>
+        /// read out the trc layout file and save it in a temporary list with temporary layout
+        /// </summary>
+        private void DeserializeLayout()
+        {
+            finalLay = File.ReadAllLines(@"..\..\final-assignment.trc").ToList();
+
+            int y = 0;
+            //foreach loops to check what the layout has
+            foreach (var singleLine in finalLay)
+            {
+                int x = 0;
+                foreach (var singleChar in singleLine)
+                {
                     Tile tile = new Tile();
-                    var test = Char.IsLetter(singleChar);
-                    switch (test)
+                    switch (singleChar)
                     {
                         //this checks if it is a letter from the alphabet, if so make station
-                        case true:
-                            tile.areaType = "";
+                        case 'A':
+                        case 'B':
+                        case 'C':
+                        case 'D':
+                        case 'E':
+                            tile.areaType = "Station";
+                            tile.whatIsIt = singleChar;
+                            tile.X = x;
+                            tile.Y = y;
                             allTiles.Add(tile);
                             break;
-                    }
-                    switch (singleChar) {
-                        case ' ':
-                            tile.areaType = "";
+                        //This is the remise trains come and go to
+                        case 'R':
+                            tile.areaType = "Remise";
+                            tile.whatIsIt = singleChar;
+                            tile.X = x;
+                            tile.Y = y;
                             allTiles.Add(tile);
                             break;
+                        //use default because we want to check every item in the list
+                        default:
+                            //if singlechar is not a space then its a track so make that class
+                            if (singleChar != ' ')
+                            {
+                                tile.whatIsIt = singleChar;
+                                tile.areaType = "Track";
+                                if (tile.dubbelTrack.Contains(singleChar))
+                                {
+                                    tile.isDubbelTrack = true;
+                                }
+                                tile.X = x;
+                                tile.Y = y;
+                                allTiles.Add(tile);
+                                break;
+                            }
+                            break;
                     }
-
+                    x++;
                 }
+                y++;
             }
-            
-
-			//convert json to templayout
-			//tempRooms = JsonConvert.DeserializeObject<List<TempLayout>>(json);
 		}
 
         /// <summary>
@@ -80,7 +101,7 @@ namespace RailRoadSimulator.Factories.LayoutFactory
         /// <param name="lay">areaType of the item</param>
         /// <param name="temp">temperary room for constructor</param>
         /// <returns>instance of the given type room</returns>
-        public ILayout GenerateRoom<T>(string lay, TempLayout temp) where T : ILayout
+        public ILayout GenerateRoom<T>(string lay, Tile temp) where T : ILayout
         {
             //get the type of the room
             Type type = Type.GetType(lay);
@@ -94,10 +115,10 @@ namespace RailRoadSimulator.Factories.LayoutFactory
             //search the namespace/current assembly for all types that are available
             //make a list out of all the types and look if one of those types contain the name of the areatype
             //if so set that type and create an instance of it.
-            //if not, return the temp room.
+            //if not, return the temp layout.
             else
             {
-                string nspace = "RailRoadSimulator.Factories.LayoutFactory";
+                string nspace = "RailRoadSimulator";
 
                 //query for all the types
                 var q = from x in Assembly.GetExecutingAssembly().GetTypes()
@@ -138,23 +159,24 @@ namespace RailRoadSimulator.Factories.LayoutFactory
             //set the dimensions of the 2dArray
             foreach (ILayout lay in layout)
             {
-                if (lay.position.X > maxArray.X)
+                if (lay.X > maxArray.X)
                 {
-                    maxArray.X = lay.position.X;
+                    maxArray.X = lay.X;
                 }
-                if (lay.position.Y > maxArray.Y)
+                if (lay.Y > maxArray.Y)
                 {
-                    maxArray.Y = lay.position.Y;
+                    maxArray.Y = lay.Y;
                 }
             }
 
             //create 2dArray
-            coordinates = new ILayout[maxArray.X + 1, maxArray.Y + 1];
+            coordinates = new ILayout[maxArray.X + 2, maxArray.Y + 1];
 
             //add the items  to the array
             foreach (ILayout lay in layout)
             {
-                coordinates[lay.position.X, lay.position.Y] = lay;
+                coordinates[lay.X, lay.Y] = lay;         
+                
             }
             return coordinates;
         }

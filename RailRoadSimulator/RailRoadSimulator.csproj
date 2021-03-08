@@ -57,21 +57,16 @@
     <Compile Include="Factories\AbstractFactory.cs" />
     <Compile Include="Factories\EntityFactory\IEntity.cs" />
     <Compile Include="Factories\EntityFactory\EntityFactory.cs" />
-    <Compile Include="Factories\EntityFactory\TempPerson.cs" />
+    <Compile Include="Factories\EntityFactory\Maid.cs" />
+    <Compile Include="Factories\EntityFactory\Person.cs" />
+    <Compile Include="Factories\EntityFactory\TempIdentity.cs" />
     <Compile Include="Factories\EntityFactory\Train.cs" />
     <Compile Include="Factories\LayoutFactory\ILayout.cs" />
     <Compile Include="Factories\LayoutFactory\LayoutFactory.cs" />
+    <Compile Include="Factories\LayoutFactory\Remise.cs" />
     <Compile Include="Factories\LayoutFactory\Station.cs" />
     <Compile Include="Factories\LayoutFactory\TempLayout.cs" />
     <Compile Include="Factories\LayoutFactory\Track.cs" />
-    <Compile Include="Factories\Persons\IPerson.cs" />
-    <Compile Include="Factories\Persons\PersonFactory.cs" />
-    <Compile Include="Factories\Persons\Travelers.cs" />
-    <Compile Include="Factories\Railway\HorizontalRailway.cs" />
-    <Compile Include="Factories\Railway\IRailway.cs" />
-    <Compile Include="Factories\Railway\RailwayFactory.cs" />
-    <Compile Include="Factories\Railway\Station.cs" />
-    <Compile Include="Factories\Railway\VerticalRailway.cs" />
     <Compile Include="Form1.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -80,8 +75,7 @@
     </Compile>
     <Compile Include="Manager.cs" />
     <Compile Include="Pathfinding\AStarAlgorithm.cs" />
-    <Compile Include="Pathfinding\Node.cs" />
-    <Compile Include="Pathfinding\Tile.cs" />
+    <Compile Include="Factories\LayoutFactory\Tile.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <EmbeddedResource Include="Form1.resx">
@@ -107,23 +101,18 @@
       <DependentUpon>Settings.settings</DependentUpon>
       <DesignTimeSharedInput>True</DesignTimeSharedInput>
     </Compile>
-    <None Include="simple-0.trc" />
-    <None Include="simple-8.trc" />
-    <None Include="trackVersion1.json" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
   </ItemGroup>
   <ItemGroup />
   <ItemGroup>
-    <Content Include="Assets\Lobby.png" />
     <Content Include="Assets\location.png" />
+    <Content Include="Assets\maid.png" />
     <Content Include="Assets\railway-station.png" />
-    <Content Include="Assets\room.png" />
     <Content Include="Assets\station.png" />
+    <Content Include="Assets\Guest.png" />
     <Content Include="Assets\track.png" />
-    <Content Include="Assets\tracks - kopie.png" />
-    <Content Include="Assets\tracks.png" />
     <Content Include="Assets\train.png" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

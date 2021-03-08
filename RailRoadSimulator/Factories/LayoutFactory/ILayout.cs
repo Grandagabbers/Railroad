@@ -5,39 +5,40 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace RailRoadSimulator.Factories.LayoutFactory
+namespace RailRoadSimulator
 {
 	public abstract class ILayout
 	{
 		public string areaType { get; set; }
-		public Point position { get; set; }
-		public int id { get; set; }
+		public int X { get; set; }
+		public int Y { get; set; }
+
 		public Image model { get; set; }
 		//distance from an other room, its used for A* and pathfinding
-		public int distance { get; set; } 
-		public Dictionary<ILayout, int> neighbours { get; set; }
-		//used for pathfinding
-		public ILayout prev { get; set; }  
-
+		public Tile Parent { get; set; }
+		public int Cost { get; set; }
+		public int Distance { get; set; }
+		public int CostDistance => Cost + Distance;
+		public char whatIsIt { get; set; }
+		public bool isOccupied { get; set; } = false;
+		public bool isDubbelTrack { get; set; } = false;
 		public ILayout()
 		{
-			distance = Int32.MaxValue / 2;
-			prev = null;
-			neighbours = new Dictionary<ILayout, int>();
+
 		}
 
 		/// <summary>
-		/// Draw the room on the bitmap
+		/// Draw the item on the bitmap
 		/// </summary>
 		/// <param name="layout">bitmap to draw on</param>
-		/// <returns>bitmap with the room drawn on it</returns>
+		/// <returns>bitmap with the item drawn on it</returns>
 		public Bitmap Draw(Bitmap layout, int size)
 		{
 
 			using (Graphics g = Graphics.FromImage(layout))
 			{
 
-				g.DrawImage(model, position.X * size, position.Y * size);
+				g.DrawImage(model, X * size, Y * size);
 			}
 			return layout;
 		}
